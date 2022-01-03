@@ -20,12 +20,12 @@ IL.Terraria.UI.ChestUI.DepositAll += PreventSoulboundStack;
         }
 ***
 
---linux version of ChestUI.DepositAll
+--windows version of ChestUI.DepositAll
 
 .method public hidebysig static 
 	void DepositAll () cil managed 
 {
-	// Method begins at RVA 0x3b71cc
+	// Method begins at RVA 0x3b729c
 	// Code size 2273 (0x8e1)
 	.maxstack 11
 	.locals init (
@@ -249,7 +249,7 @@ IL.Terraria.UI.ChestUI.DepositAll += PreventSoulboundStack;
 			IL_01be: ldc.i4.1
 			IL_01bf: ldc.r4 1
 			IL_01c4: ldc.r4 0.0
-			IL_01c9: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_01c9: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 			IL_01ce: pop
 			// if (player.inventory[num].stack <= 0)
 			IL_01cf: ldloc.0
@@ -445,7 +445,7 @@ IL.Terraria.UI.ChestUI.DepositAll += PreventSoulboundStack;
 			IL_0372: ldc.i4.1
 			IL_0373: ldc.r4 1
 			IL_0378: ldc.r4 0.0
-			IL_037d: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_037d: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 			IL_0382: pop
 			// if (player.inventory[num].stack <= 0)
 			IL_0383: ldloc.0
@@ -602,7 +602,7 @@ IL.Terraria.UI.ChestUI.DepositAll += PreventSoulboundStack;
 			IL_04df: ldc.i4.1
 			IL_04e0: ldc.r4 1
 			IL_04e5: ldc.r4 0.0
-			IL_04ea: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_04ea: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 			IL_04ef: pop
 			// if (player.inventory[num].stack <= 0)
 			IL_04f0: ldloc.0
@@ -753,7 +753,7 @@ IL.Terraria.UI.ChestUI.DepositAll += PreventSoulboundStack;
 			IL_063f: ldc.i4.1
 			IL_0640: ldc.r4 1
 			IL_0645: ldc.r4 0.0
-			IL_064a: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_064a: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 			IL_064f: pop
 			// if (player.inventory[num].stack <= 0)
 			IL_0650: ldloc.0
@@ -854,7 +854,7 @@ IL.Terraria.UI.ChestUI.DepositAll += PreventSoulboundStack;
 			IL_06ff: ldc.i4.1
 			IL_0700: ldc.r4 1
 			IL_0705: ldc.r4 0.0
-			IL_070a: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_070a: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 			IL_070f: pop
 			// Main.chest[player.chest].item[j] = player.inventory[num].Clone();
 			IL_0710: ldsfld class Terraria.Chest[] Terraria.Main::chest
@@ -941,7 +941,7 @@ IL.Terraria.UI.ChestUI.DepositAll += PreventSoulboundStack;
 			IL_07ab: ldc.i4.1
 			IL_07ac: ldc.r4 1
 			IL_07b1: ldc.r4 0.0
-			IL_07b6: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_07b6: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 			IL_07bb: pop
 			// player.bank2.item[k] = player.inventory[num].Clone();
 			IL_07bc: ldloc.0
@@ -1006,7 +1006,7 @@ IL.Terraria.UI.ChestUI.DepositAll += PreventSoulboundStack;
 			IL_0823: ldc.i4.1
 			IL_0824: ldc.r4 1
 			IL_0829: ldc.r4 0.0
-			IL_082e: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_082e: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 			IL_0833: pop
 			// player.bank3.item[l] = player.inventory[num].Clone();
 			IL_0834: ldloc.0
@@ -1065,7 +1065,7 @@ IL.Terraria.UI.ChestUI.DepositAll += PreventSoulboundStack;
 			IL_088b: ldc.i4.1
 			IL_088c: ldc.r4 1
 			IL_0891: ldc.r4 0.0
-			IL_0896: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_0896: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 			IL_089b: pop
 			// player.bank.item[m] = player.inventory[num].Clone();
 			IL_089c: ldloc.0

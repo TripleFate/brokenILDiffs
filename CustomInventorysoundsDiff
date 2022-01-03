@@ -105,7 +105,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 
 ***
 
---linux version of ItemSlot.LeftClick_ItemArray_int_int
+--windows version of ItemSlot.LeftClick_ItemArray_int_int
 
 .method public hidebysig static 
 	void LeftClick (
@@ -116,7 +116,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 {
 	.param [2] = int32(0)
 	.param [3] = int32(0)
-	// Method begins at RVA 0x3b9a78
+	// Method begins at RVA 0x3b9b48
 	// Code size 2431 (0x97f)
 	.maxstack 11
 	.locals init (
@@ -412,7 +412,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_020c: ldc.i4.1
 	IL_020d: ldc.r4 1
 	IL_0212: ldc.r4 0.0
-	IL_0217: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_0217: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_021c: pop
 
 	// if (context == 3 && Main.netMode == 1)
@@ -480,7 +480,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_029e: ldc.i4.1
 	IL_029f: ldc.r4 1
 	IL_02a4: ldc.r4 0.0
-	IL_02a9: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_02a9: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_02ae: pop
 	// if (inv[slot].stack > 0)
 	IL_02af: ldarg.0
@@ -602,7 +602,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_0380: ldc.i4.1
 	IL_0381: ldc.r4 1
 	IL_0386: ldc.r4 0.0
-	IL_038b: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_038b: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_0390: pop
 	// if (Main.mouseItem.type <= 0 || inv[slot].type != 0)
 	IL_0391: br IL_096d
@@ -686,7 +686,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_0434: ldc.i4.1
 	IL_0435: ldc.r4 1
 	IL_043a: ldc.r4 0.0
-	IL_043f: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_043f: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_0444: pop
 	// Main.mouseItem.stack--;
 	IL_0445: br.s IL_0485
@@ -714,7 +714,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_0474: ldc.i4.1
 	IL_0475: ldc.r4 1
 	IL_047a: ldc.r4 0.0
-	IL_047f: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_047f: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_0484: pop
 
 	// if (inv[slot].stack > 0)
@@ -802,7 +802,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_0518: ldc.i4.1
 	IL_0519: ldc.r4 1
 	IL_051e: ldc.r4 0.0
-	IL_0523: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_0523: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_0528: pop
 	// if (inv[slot].stack > 0)
 	IL_0529: ldarg.0
@@ -924,7 +924,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_05fa: ldc.i4.1
 	IL_05fb: ldc.r4 1
 	IL_0600: ldc.r4 0.0
-	IL_0605: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_0605: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_060a: pop
 	// if (Main.mouseItem.dye <= 0 || inv[slot].type != 0)
 	IL_060b: br IL_096d
@@ -1008,7 +1008,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_06ae: ldc.i4.1
 	IL_06af: ldc.r4 1
 	IL_06b4: ldc.r4 0.0
-	IL_06b9: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_06b9: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_06be: pop
 	// Main.mouseItem.stack--;
 	IL_06bf: br.s IL_06ff
@@ -1036,7 +1036,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_06ee: ldc.i4.1
 	IL_06ef: ldc.r4 1
 	IL_06f4: ldc.r4 0.0
-	IL_06f9: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_06f9: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_06fe: pop
 
 	// if (inv[slot].stack > 0)
@@ -1133,18 +1133,18 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	// Main.mouseItem.position = player.Center - new Vector2(Main.mouseItem.width, Main.mouseItem.headSlot) / 2f;
 	IL_079c: ldsfld class Terraria.Item Terraria.Main::mouseItem
 	IL_07a1: ldloc.0
-	IL_07a2: callvirt instance valuetype [FNA]Microsoft.Xna.Framework.Vector2 Terraria.Entity::get_Center()
+	IL_07a2: callvirt instance valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2 Terraria.Entity::get_Center()
 	IL_07a7: ldsfld class Terraria.Item Terraria.Main::mouseItem
 	IL_07ac: ldfld int32 Terraria.Entity::width
 	IL_07b1: conv.r4
 	IL_07b2: ldsfld class Terraria.Item Terraria.Main::mouseItem
 	IL_07b7: ldfld int32 Terraria.Item::headSlot
 	IL_07bc: conv.r4
-	IL_07bd: newobj instance void [FNA]Microsoft.Xna.Framework.Vector2::.ctor(float32, float32)
+	IL_07bd: newobj instance void [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2::.ctor(float32, float32)
 	IL_07c2: ldc.r4 2
-	IL_07c7: call valuetype [FNA]Microsoft.Xna.Framework.Vector2 [FNA]Microsoft.Xna.Framework.Vector2::op_Division(valuetype [FNA]Microsoft.Xna.Framework.Vector2, float32)
-	IL_07cc: call valuetype [FNA]Microsoft.Xna.Framework.Vector2 [FNA]Microsoft.Xna.Framework.Vector2::op_Subtraction(valuetype [FNA]Microsoft.Xna.Framework.Vector2, valuetype [FNA]Microsoft.Xna.Framework.Vector2)
-	IL_07d1: stfld valuetype [FNA]Microsoft.Xna.Framework.Vector2 Terraria.Entity::position
+	IL_07c7: call valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2 [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2::op_Division(valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2, float32)
+	IL_07cc: call valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2 [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2::op_Subtraction(valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2, valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2)
+	IL_07d1: stfld valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2 Terraria.Entity::position
 	// ItemText.NewText(Main.mouseItem, Main.mouseItem.stack);
 	IL_07d6: ldsfld class Terraria.Item Terraria.Main::mouseItem
 	IL_07db: ldsfld class Terraria.Item Terraria.Main::mouseItem
@@ -1196,7 +1196,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_0828: ldc.i4.1
 	IL_0829: ldc.r4 1
 	IL_082e: ldc.r4 0.0
-	IL_0833: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_0833: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_0838: pop
 	// Main.PlaySound(7);
 	IL_0839: br.s IL_084f
@@ -1207,7 +1207,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_083e: ldc.i4.1
 	IL_083f: ldc.r4 1
 	IL_0844: ldc.r4 0.0
-	IL_0849: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_0849: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_084e: pop
 
 	// PlayerHooks.PostBuyItem(player, Main.npc[player.talkNPC], inv, Main.mouseItem);
@@ -1265,7 +1265,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_08d5: ldc.i4.1
 	IL_08d6: ldc.r4 1
 	IL_08db: ldc.r4 0.0
-	IL_08e0: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_08e0: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_08e5: pop
 	// PlayerHooks.PostSellItem(player, Main.npc[player.talkNPC], chest.item, chest.item[num]);
 	IL_08e6: ldloc.0
@@ -1304,7 +1304,7 @@ IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
 	IL_0934: ldc.i4.1
 	IL_0935: ldc.r4 1
 	IL_093a: ldc.r4 0.0
-	IL_093f: call class [FNA]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_093f: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
 	IL_0944: pop
 	// PlayerHooks.PostSellItem(player, Main.npc[player.talkNPC], chest.item, chest.item[num2]);
 	IL_0945: ldloc.0
