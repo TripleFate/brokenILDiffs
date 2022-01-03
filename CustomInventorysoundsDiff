@@ -1,0 +1,1344 @@
+*** this is the diff related to CustomInventorySounds
+
+for reference the il edit is: 
+
+IL.Terraria.UI.ItemSlot.LeftClick_ItemArray_int_int += PlayCustomSound;
+
+		private void PlayCustomSound(ILContext il)
+		{
+			ILCursor c = new ILCursor(il);
+
+			while (c.TryGotoNext(n => n.MatchCall<Main>("PlaySound"))) //swap every sound call
+			{
+
+				var branchTarget = il.DefineLabel(c.Next.Next); //so we can skip to after the vanilla sound call later
+
+				c.Index -= 5; //back up 5 instructions to just under where the soundID is pushed
+
+				c.Emit(OpCodes.Ldarg_0); //load item array
+				c.Emit(OpCodes.Ldarg_2); //load index
+				c.Emit(OpCodes.Ldelem_Ref); //push item ref
+
+				c.EmitDelegate<Func<int, Item, SoundEffectInstance>>(PlayNewSound); //play the custom sound if applicable
+				c.Emit(OpCodes.Br, branchTarget); //move past sound call
+
+				c.Index += 7; //so we wont keep patching the same call lol
+			}
+		}
+
+		private SoundEffectInstance PlayNewSound(int originalSoundID, Item item)
+		{
+			Config config = GetInstance<Config>();
+
+			if (config.InvSounds == CustomSounds.None)
+				return Main.PlaySound(originalSoundID, -1, -1, 1, 1, 0);
+
+			float pitch = -0.6f;
+
+			if (item.IsAir)
+			{
+				item = Main.mouseItem;
+				pitch += 0.6f;
+			}
+
+			if (originalSoundID != 7) 
+				pitch += 0.3f;
+
+			//this is gross. The alternative is moving this into a GlobalItem instead. Thus its here.
+			if (item.modItem is ICustomInventorySound)
+				return (item.modItem as ICustomInventorySound).InventorySound(pitch);
+
+			else if (config.InvSounds == CustomSounds.Specific)
+				return Main.PlaySound(originalSoundID, -1, -1, 1, 1, 0);
+
+			else if (item.potion || item.healMana != 0 || (item.buffType != -1 && (item.Name.Contains("potion") || item.Name.Contains("Potion")))) //should probably figure a better check for this somehow? 1.4 content tags maybe?
+				return Helper.PlayPitched("Pickups/PickupPotion", 1, 0.5f + pitch * 0.5f);
+
+			else if (item.type == ItemID.CopperCoin || item.type == ItemID.SilverCoin || item.type == ItemID.GoldCoin || item.type == ItemID.PlatinumCoin) //coins are early since they're ammo and have damage and place tiles. 
+				return Helper.PlayPitched(SoundID.Coins, 1, 0.3f + pitch);
+
+			else if (item.dye > 0) //dyes
+				return Helper.PlayPitched("Pickups/PickupPotion", 1, 0.9f + pitch * 0.25f);
+
+			else if (item.createTile != -1) //placables
+				return Helper.PlayPitched("Pickups/PickupGeneric", 1, 1 + pitch);
+
+			else if (item.defense > 0) //armor and shields
+				return Helper.PlayPitched("Pickups/PickupArmor", 1, 0.5f + pitch);
+
+			else if (item.vanity) //vanity
+				return Helper.PlayPitched("Pickups/PickupVanity", 1, 0.5f + pitch);
+
+			else if (item.accessory) //non-vanity non-shield accessories
+				return Helper.PlayPitched("Pickups/PickupAccessory", 1, 0.1f + pitch);
+
+			else if (item.pick > 0 || item.axe > 0 || item.hammer > 0) //tools
+				return Helper.PlayPitched("Pickups/PickupTool", 1, 0.5f + pitch);
+
+			else if (item.damage > 0) //weapons and ammo
+			{
+				if (item.melee) //melee weapons
+					return Helper.PlayPitched("Pickups/PickupMelee", 1, 0.5f + pitch);
+
+				else if (item.useAmmo == ItemID.MusketBall) //guns
+					return Helper.PlayPitched("Pickups/PickupGun", 1, 0 + pitch);
+
+				else if (item.ranged) //other ranged weapons
+					return Helper.PlayPitched("Pickups/PickupGeneric", 1, 0.9f + pitch * 0.5f);
+
+				else if (item.magic || item.summon) //magic and summoning weapons
+					return Helper.PlayPitched("Pickups/PickupGeneric", 1, 0.5f + pitch);
+
+				else if (item.ammo == ItemID.WoodenArrow) //arrows
+					return Helper.PlayPitched("Pickups/PickupGeneric", 1, 0.5f + pitch);
+
+				else if (item.ammo > 0) //other ammo
+					return Helper.PlayPitched("Pickups/PickupGeneric", 1, 0.5f + pitch);
+
+				else //edge cases
+					return Helper.PlayPitched("Pickups/PickupGeneric", 1, 0.5f + pitch);
+			}
+
+			else
+				return Main.PlaySound(originalSoundID, -1, -1, 1, 1, 0);
+		}
+
+***
+
+--windows version of ItemSlot.LeftClick_ItemArray_int_int
+
+.method public hidebysig static 
+	void LeftClick (
+		class Terraria.Item[] inv,
+		[opt] int32 context,
+		[opt] int32 slot
+	) cil managed 
+{
+	.param [2] = int32(0)
+	.param [3] = int32(0)
+	// Method begins at RVA 0x3b9b48
+	// Code size 2431 (0x97f)
+	.maxstack 11
+	.locals init (
+		[0] class Terraria.Player,
+		[1] bool,
+		[2] int32,
+		[3] int32,
+		[4] int32,
+		[5] class Terraria.Chest,
+		[6] int32,
+		[7] int32
+	)
+
+	// if (OverrideLeftClick(inv, context, slot))
+	IL_0000: ldarg.0
+	IL_0001: ldarg.1
+	IL_0002: ldarg.2
+	IL_0003: call bool Terraria.UI.ItemSlot::OverrideLeftClick(class Terraria.Item[], int32, int32)
+	IL_0008: brfalse.s IL_000b
+
+	// }
+	IL_000a: ret
+
+	// inv[slot].newAndShiny = false;
+	IL_000b: ldarg.0
+	IL_000c: ldarg.2
+	IL_000d: ldelem.ref
+	IL_000e: ldc.i4.0
+	IL_000f: stfld bool Terraria.Item::newAndShiny
+	// Player player = Main.player[Main.myPlayer];
+	IL_0014: ldsfld class Terraria.Player[] Terraria.Main::player
+	IL_0019: ldsfld int32 Terraria.Main::myPlayer
+	IL_001e: ldelem.ref
+	IL_001f: stloc.0
+	// bool flag = false;
+	IL_0020: ldc.i4.0
+	IL_0021: stloc.1
+	// if ((uint)context <= 4u)
+	IL_0022: ldarg.1
+	IL_0023: ldc.i4.4
+	IL_0024: bgt.un.s IL_0030
+
+	// flag = player.chest == -1;
+	IL_0026: ldloc.0
+	IL_0027: ldfld int32 Terraria.Player::chest
+	IL_002c: ldc.i4.m1
+	IL_002d: ceq
+	IL_002f: stloc.1
+
+	// if (ShiftInUse && flag)
+	IL_0030: call bool Terraria.UI.ItemSlot::get_ShiftInUse()
+	IL_0035: ldloc.1
+	IL_0036: and
+	IL_0037: brfalse.s IL_0042
+
+	// SellOrTrash(inv, context, slot);
+	IL_0039: ldarg.0
+	IL_003a: ldarg.1
+	IL_003b: ldarg.2
+	IL_003c: call void Terraria.UI.ItemSlot::SellOrTrash(class Terraria.Item[], int32, int32)
+	// if (player.itemAnimation != 0 || player.itemTime != 0)
+	IL_0041: ret
+
+	IL_0042: ldloc.0
+	IL_0043: ldfld int32 Terraria.Player::itemAnimation
+	IL_0048: brtrue.s IL_0052
+
+	IL_004a: ldloc.0
+	IL_004b: ldfld int32 Terraria.Player::itemTime
+	IL_0050: brfalse.s IL_0053
+
+	// switch (PickItemMovementAction(inv, context, slot, Main.mouseItem))
+	IL_0052: ret
+
+	IL_0053: ldarg.0
+	IL_0054: ldarg.1
+	IL_0055: ldarg.2
+	IL_0056: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_005b: call int32 Terraria.UI.ItemSlot::PickItemMovementAction(class Terraria.Item[], int32, int32, class Terraria.Item)
+	IL_0060: stloc.2
+	IL_0061: ldloc.2
+	IL_0062: switch (IL_0080, IL_0253, IL_04c5, IL_073f, IL_086c)
+
+	IL_007b: br IL_096d
+
+	// if (context == 6 && Main.mouseItem.type != 0)
+	IL_0080: ldarg.1
+	IL_0081: ldc.i4.6
+	IL_0082: bne.un.s IL_009a
+
+	IL_0084: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0089: ldfld int32 Terraria.Item::'type'
+	IL_008e: brfalse.s IL_009a
+
+	// inv[slot].SetDefaults();
+	IL_0090: ldarg.0
+	IL_0091: ldarg.2
+	IL_0092: ldelem.ref
+	IL_0093: ldc.i4.0
+	IL_0094: ldc.i4.0
+	IL_0095: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+
+	// Utils.Swap(ref inv[slot], ref Main.mouseItem);
+	IL_009a: ldarg.0
+	IL_009b: ldarg.2
+	IL_009c: ldelema Terraria.Item
+	IL_00a1: ldsflda class Terraria.Item Terraria.Main::mouseItem
+	IL_00a6: call void Terraria.Utils::Swap<class Terraria.Item>(!!0&, !!0&)
+	// if (inv[slot].stack > 0)
+	IL_00ab: ldarg.0
+	IL_00ac: ldarg.2
+	IL_00ad: ldelem.ref
+	IL_00ae: ldfld int32 Terraria.Item::stack
+	IL_00b3: ldc.i4.0
+	IL_00b4: ble.s IL_00dd
+
+	// switch (context)
+	IL_00b6: ldarg.1
+	IL_00b7: brfalse.s IL_00c8
+
+	// (no C# code)
+	IL_00b9: ldarg.1
+	IL_00ba: ldc.i4.8
+	IL_00bb: sub
+	IL_00bc: ldc.i4.4
+	IL_00bd: ble.un.s IL_00d3
+
+	IL_00bf: ldarg.1
+	IL_00c0: ldc.i4.s 16
+	IL_00c2: sub
+	IL_00c3: ldc.i4.1
+	IL_00c4: ble.un.s IL_00d3
+
+	// AchievementsHelper.NotifyItemPickup(player, inv[slot]);
+	IL_00c6: br.s IL_00dd
+
+	IL_00c8: ldloc.0
+	IL_00c9: ldarg.0
+	IL_00ca: ldarg.2
+	IL_00cb: ldelem.ref
+	IL_00cc: call void Terraria.GameContent.Achievements.AchievementsHelper::NotifyItemPickup(class Terraria.Player, class Terraria.Item)
+	// break;
+	IL_00d1: br.s IL_00dd
+
+	// AchievementsHelper.HandleOnEquip(player, inv[slot], context);
+	IL_00d3: ldloc.0
+	IL_00d4: ldarg.0
+	IL_00d5: ldarg.2
+	IL_00d6: ldelem.ref
+	IL_00d7: ldarg.1
+	IL_00d8: call void Terraria.GameContent.Achievements.AchievementsHelper::HandleOnEquip(class Terraria.Player, class Terraria.Item, int32)
+
+	// if (inv[slot].type == 0 || inv[slot].stack < 1)
+	IL_00dd: ldarg.0
+	IL_00de: ldarg.2
+	IL_00df: ldelem.ref
+	IL_00e0: ldfld int32 Terraria.Item::'type'
+	IL_00e5: brfalse.s IL_00f2
+
+	IL_00e7: ldarg.0
+	IL_00e8: ldarg.2
+	IL_00e9: ldelem.ref
+	IL_00ea: ldfld int32 Terraria.Item::stack
+	IL_00ef: ldc.i4.1
+	IL_00f0: bge.s IL_00fa
+
+	// inv[slot] = new Item();
+	IL_00f2: ldarg.0
+	IL_00f3: ldarg.2
+	IL_00f4: newobj instance void Terraria.Item::.ctor()
+	IL_00f9: stelem.ref
+
+	// if (Main.mouseItem.IsTheSameAs(inv[slot]))
+	IL_00fa: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_00ff: ldarg.0
+	IL_0100: ldarg.2
+	IL_0101: ldelem.ref
+	IL_0102: callvirt instance bool Terraria.Item::IsTheSameAs(class Terraria.Item)
+	IL_0107: brfalse IL_01c9
+
+	// Utils.Swap(ref inv[slot].favorited, ref Main.mouseItem.favorited);
+	IL_010c: ldarg.0
+	IL_010d: ldarg.2
+	IL_010e: ldelem.ref
+	IL_010f: ldflda bool Terraria.Item::favorited
+	IL_0114: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0119: ldflda bool Terraria.Item::favorited
+	IL_011e: call void Terraria.Utils::Swap<bool>(!!0&, !!0&)
+	// if (inv[slot].stack != inv[slot].maxStack && Main.mouseItem.stack != Main.mouseItem.maxStack)
+	IL_0123: ldarg.0
+	IL_0124: ldarg.2
+	IL_0125: ldelem.ref
+	IL_0126: ldfld int32 Terraria.Item::stack
+	IL_012b: ldarg.0
+	IL_012c: ldarg.2
+	IL_012d: ldelem.ref
+	IL_012e: ldfld int32 Terraria.Item::maxStack
+	IL_0133: beq IL_01c9
+
+	IL_0138: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_013d: ldfld int32 Terraria.Item::stack
+	IL_0142: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0147: ldfld int32 Terraria.Item::maxStack
+	IL_014c: beq.s IL_01c9
+
+	// if (Main.mouseItem.stack + inv[slot].stack <= Main.mouseItem.maxStack)
+	IL_014e: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0153: ldfld int32 Terraria.Item::stack
+	IL_0158: ldarg.0
+	IL_0159: ldarg.2
+	IL_015a: ldelem.ref
+	IL_015b: ldfld int32 Terraria.Item::stack
+	IL_0160: add
+	IL_0161: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0166: ldfld int32 Terraria.Item::maxStack
+	IL_016b: bgt.s IL_0193
+
+	// inv[slot].stack += Main.mouseItem.stack;
+	IL_016d: ldarg.0
+	IL_016e: ldarg.2
+	IL_016f: ldelem.ref
+	IL_0170: dup
+	IL_0171: ldfld int32 Terraria.Item::stack
+	IL_0176: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_017b: ldfld int32 Terraria.Item::stack
+	IL_0180: add
+	IL_0181: stfld int32 Terraria.Item::stack
+	// Main.mouseItem.stack = 0;
+	IL_0186: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_018b: ldc.i4.0
+	IL_018c: stfld int32 Terraria.Item::stack
+	// int num3 = Main.mouseItem.maxStack - inv[slot].stack;
+	IL_0191: br.s IL_01c9
+
+	IL_0193: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0198: ldfld int32 Terraria.Item::maxStack
+	IL_019d: ldarg.0
+	IL_019e: ldarg.2
+	IL_019f: ldelem.ref
+	IL_01a0: ldfld int32 Terraria.Item::stack
+	IL_01a5: sub
+	IL_01a6: stloc.3
+	// inv[slot].stack += num3;
+	IL_01a7: ldarg.0
+	IL_01a8: ldarg.2
+	IL_01a9: ldelem.ref
+	IL_01aa: dup
+	IL_01ab: ldfld int32 Terraria.Item::stack
+	IL_01b0: ldloc.3
+	IL_01b1: add
+	IL_01b2: stfld int32 Terraria.Item::stack
+	// Main.mouseItem.stack -= num3;
+	IL_01b7: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_01bc: dup
+	IL_01bd: ldfld int32 Terraria.Item::stack
+	IL_01c2: ldloc.3
+	IL_01c3: sub
+	IL_01c4: stfld int32 Terraria.Item::stack
+
+	// if (Main.mouseItem.type == 0 || Main.mouseItem.stack < 1)
+	IL_01c9: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_01ce: ldfld int32 Terraria.Item::'type'
+	IL_01d3: brfalse.s IL_01e2
+
+	IL_01d5: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_01da: ldfld int32 Terraria.Item::stack
+	IL_01df: ldc.i4.1
+	IL_01e0: bge.s IL_01ec
+
+	// Main.mouseItem = new Item();
+	IL_01e2: newobj instance void Terraria.Item::.ctor()
+	IL_01e7: stsfld class Terraria.Item Terraria.Main::mouseItem
+
+	// if (Main.mouseItem.type > 0 || inv[slot].type > 0)
+	IL_01ec: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_01f1: ldfld int32 Terraria.Item::'type'
+	IL_01f6: ldc.i4.0
+	IL_01f7: bgt.s IL_0204
+
+	IL_01f9: ldarg.0
+	IL_01fa: ldarg.2
+	IL_01fb: ldelem.ref
+	IL_01fc: ldfld int32 Terraria.Item::'type'
+	IL_0201: ldc.i4.0
+	IL_0202: ble.s IL_021d
+
+	// Recipe.FindRecipes();
+	IL_0204: call void Terraria.Recipe::FindRecipes()
+	// Main.PlaySound(7);
+	IL_0209: ldc.i4.7
+	IL_020a: ldc.i4.m1
+	IL_020b: ldc.i4.m1
+	IL_020c: ldc.i4.1
+	IL_020d: ldc.r4 1
+	IL_0212: ldc.r4 0.0
+	IL_0217: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_021c: pop
+
+	// if (context == 3 && Main.netMode == 1)
+	IL_021d: ldarg.1
+	IL_021e: ldc.i4.3
+	IL_021f: bne.un IL_096d
+
+	IL_0224: ldsfld int32 Terraria.Main::netMode
+	IL_0229: ldc.i4.1
+	IL_022a: bne.un IL_096d
+
+	// NetMessage.SendData(32, -1, -1, null, player.chest, slot);
+	IL_022f: ldc.i4.s 32
+	IL_0231: ldc.i4.m1
+	IL_0232: ldc.i4.m1
+	IL_0233: ldnull
+	IL_0234: ldloc.0
+	IL_0235: ldfld int32 Terraria.Player::chest
+	IL_023a: ldarg.2
+	IL_023b: conv.r4
+	IL_023c: ldc.r4 0.0
+	IL_0241: ldc.r4 0.0
+	IL_0246: ldc.i4.0
+	IL_0247: ldc.i4.0
+	IL_0248: ldc.i4.0
+	IL_0249: call void Terraria.NetMessage::SendData(int32, int32, int32, class Terraria.Localization.NetworkText, int32, float32, float32, float32, int32, int32, int32)
+	// break;
+	IL_024e: br IL_096d
+
+	// if (Main.mouseItem.stack == 1 && Main.mouseItem.type > 0 && inv[slot].type > 0 && inv[slot].IsNotTheSameAs(Main.mouseItem))
+	IL_0253: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0258: ldfld int32 Terraria.Item::stack
+	IL_025d: ldc.i4.1
+	IL_025e: bne.un IL_02ef
+
+	IL_0263: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0268: ldfld int32 Terraria.Item::'type'
+	IL_026d: ldc.i4.0
+	IL_026e: ble.s IL_02ef
+
+	IL_0270: ldarg.0
+	IL_0271: ldarg.2
+	IL_0272: ldelem.ref
+	IL_0273: ldfld int32 Terraria.Item::'type'
+	IL_0278: ldc.i4.0
+	IL_0279: ble.s IL_02ef
+
+	IL_027b: ldarg.0
+	IL_027c: ldarg.2
+	IL_027d: ldelem.ref
+	IL_027e: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0283: callvirt instance bool Terraria.Item::IsNotTheSameAs(class Terraria.Item)
+	IL_0288: brfalse.s IL_02ef
+
+	// Utils.Swap(ref inv[slot], ref Main.mouseItem);
+	IL_028a: ldarg.0
+	IL_028b: ldarg.2
+	IL_028c: ldelema Terraria.Item
+	IL_0291: ldsflda class Terraria.Item Terraria.Main::mouseItem
+	IL_0296: call void Terraria.Utils::Swap<class Terraria.Item>(!!0&, !!0&)
+	// Main.PlaySound(7);
+	IL_029b: ldc.i4.7
+	IL_029c: ldc.i4.m1
+	IL_029d: ldc.i4.m1
+	IL_029e: ldc.i4.1
+	IL_029f: ldc.r4 1
+	IL_02a4: ldc.r4 0.0
+	IL_02a9: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_02ae: pop
+	// if (inv[slot].stack > 0)
+	IL_02af: ldarg.0
+	IL_02b0: ldarg.2
+	IL_02b1: ldelem.ref
+	IL_02b2: ldfld int32 Terraria.Item::stack
+	IL_02b7: ldc.i4.0
+	IL_02b8: ble IL_096d
+
+	// switch (context)
+	IL_02bd: ldarg.1
+	IL_02be: brfalse.s IL_02d2
+
+	// (no C# code)
+	IL_02c0: ldarg.1
+	IL_02c1: ldc.i4.8
+	IL_02c2: sub
+	IL_02c3: ldc.i4.4
+	IL_02c4: ble.un.s IL_02e0
+
+	IL_02c6: ldarg.1
+	IL_02c7: ldc.i4.s 16
+	IL_02c9: sub
+	IL_02ca: ldc.i4.1
+	IL_02cb: ble.un.s IL_02e0
+
+	// AchievementsHelper.NotifyItemPickup(player, inv[slot]);
+	IL_02cd: br IL_096d
+
+	IL_02d2: ldloc.0
+	IL_02d3: ldarg.0
+	IL_02d4: ldarg.2
+	IL_02d5: ldelem.ref
+	IL_02d6: call void Terraria.GameContent.Achievements.AchievementsHelper::NotifyItemPickup(class Terraria.Player, class Terraria.Item)
+	// break;
+	IL_02db: br IL_096d
+
+	// AchievementsHelper.HandleOnEquip(player, inv[slot], context);
+	IL_02e0: ldloc.0
+	IL_02e1: ldarg.0
+	IL_02e2: ldarg.2
+	IL_02e3: ldelem.ref
+	IL_02e4: ldarg.1
+	IL_02e5: call void Terraria.GameContent.Achievements.AchievementsHelper::HandleOnEquip(class Terraria.Player, class Terraria.Item, int32)
+	// break;
+	IL_02ea: br IL_096d
+
+	// else if (Main.mouseItem.type == 0 && inv[slot].type > 0)
+	IL_02ef: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_02f4: ldfld int32 Terraria.Item::'type'
+	IL_02f9: brtrue IL_0396
+
+	IL_02fe: ldarg.0
+	IL_02ff: ldarg.2
+	IL_0300: ldelem.ref
+	IL_0301: ldfld int32 Terraria.Item::'type'
+	IL_0306: ldc.i4.0
+	IL_0307: ble IL_0396
+
+	// Utils.Swap(ref inv[slot], ref Main.mouseItem);
+	IL_030c: ldarg.0
+	IL_030d: ldarg.2
+	IL_030e: ldelema Terraria.Item
+	IL_0313: ldsflda class Terraria.Item Terraria.Main::mouseItem
+	IL_0318: call void Terraria.Utils::Swap<class Terraria.Item>(!!0&, !!0&)
+	// if (inv[slot].type == 0 || inv[slot].stack < 1)
+	IL_031d: ldarg.0
+	IL_031e: ldarg.2
+	IL_031f: ldelem.ref
+	IL_0320: ldfld int32 Terraria.Item::'type'
+	IL_0325: brfalse.s IL_0332
+
+	IL_0327: ldarg.0
+	IL_0328: ldarg.2
+	IL_0329: ldelem.ref
+	IL_032a: ldfld int32 Terraria.Item::stack
+	IL_032f: ldc.i4.1
+	IL_0330: bge.s IL_033a
+
+	// inv[slot] = new Item();
+	IL_0332: ldarg.0
+	IL_0333: ldarg.2
+	IL_0334: newobj instance void Terraria.Item::.ctor()
+	IL_0339: stelem.ref
+
+	// if (Main.mouseItem.type == 0 || Main.mouseItem.stack < 1)
+	IL_033a: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_033f: ldfld int32 Terraria.Item::'type'
+	IL_0344: brfalse.s IL_0353
+
+	IL_0346: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_034b: ldfld int32 Terraria.Item::stack
+	IL_0350: ldc.i4.1
+	IL_0351: bge.s IL_035d
+
+	// Main.mouseItem = new Item();
+	IL_0353: newobj instance void Terraria.Item::.ctor()
+	IL_0358: stsfld class Terraria.Item Terraria.Main::mouseItem
+
+	// if (Main.mouseItem.type > 0 || inv[slot].type > 0)
+	IL_035d: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0362: ldfld int32 Terraria.Item::'type'
+	IL_0367: ldc.i4.0
+	IL_0368: bgt.s IL_0378
+
+	IL_036a: ldarg.0
+	IL_036b: ldarg.2
+	IL_036c: ldelem.ref
+	IL_036d: ldfld int32 Terraria.Item::'type'
+	IL_0372: ldc.i4.0
+	IL_0373: ble IL_096d
+
+	// Recipe.FindRecipes();
+	IL_0378: call void Terraria.Recipe::FindRecipes()
+	// Main.PlaySound(7);
+	IL_037d: ldc.i4.7
+	IL_037e: ldc.i4.m1
+	IL_037f: ldc.i4.m1
+	IL_0380: ldc.i4.1
+	IL_0381: ldc.r4 1
+	IL_0386: ldc.r4 0.0
+	IL_038b: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_0390: pop
+	// if (Main.mouseItem.type <= 0 || inv[slot].type != 0)
+	IL_0391: br IL_096d
+
+	IL_0396: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_039b: ldfld int32 Terraria.Item::'type'
+	IL_03a0: ldc.i4.0
+	IL_03a1: ble IL_096d
+
+	IL_03a6: ldarg.0
+	IL_03a7: ldarg.2
+	IL_03a8: ldelem.ref
+	IL_03a9: ldfld int32 Terraria.Item::'type'
+	IL_03ae: brtrue IL_096d
+
+	// if (Main.mouseItem.stack == 1)
+	IL_03b3: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_03b8: ldfld int32 Terraria.Item::stack
+	IL_03bd: ldc.i4.1
+	IL_03be: bne.un IL_0447
+
+	// Utils.Swap(ref inv[slot], ref Main.mouseItem);
+	IL_03c3: ldarg.0
+	IL_03c4: ldarg.2
+	IL_03c5: ldelema Terraria.Item
+	IL_03ca: ldsflda class Terraria.Item Terraria.Main::mouseItem
+	IL_03cf: call void Terraria.Utils::Swap<class Terraria.Item>(!!0&, !!0&)
+	// if (inv[slot].type == 0 || inv[slot].stack < 1)
+	IL_03d4: ldarg.0
+	IL_03d5: ldarg.2
+	IL_03d6: ldelem.ref
+	IL_03d7: ldfld int32 Terraria.Item::'type'
+	IL_03dc: brfalse.s IL_03e9
+
+	IL_03de: ldarg.0
+	IL_03df: ldarg.2
+	IL_03e0: ldelem.ref
+	IL_03e1: ldfld int32 Terraria.Item::stack
+	IL_03e6: ldc.i4.1
+	IL_03e7: bge.s IL_03f1
+
+	// inv[slot] = new Item();
+	IL_03e9: ldarg.0
+	IL_03ea: ldarg.2
+	IL_03eb: newobj instance void Terraria.Item::.ctor()
+	IL_03f0: stelem.ref
+
+	// if (Main.mouseItem.type == 0 || Main.mouseItem.stack < 1)
+	IL_03f1: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_03f6: ldfld int32 Terraria.Item::'type'
+	IL_03fb: brfalse.s IL_040a
+
+	IL_03fd: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0402: ldfld int32 Terraria.Item::stack
+	IL_0407: ldc.i4.1
+	IL_0408: bge.s IL_0414
+
+	// Main.mouseItem = new Item();
+	IL_040a: newobj instance void Terraria.Item::.ctor()
+	IL_040f: stsfld class Terraria.Item Terraria.Main::mouseItem
+
+	// if (Main.mouseItem.type > 0 || inv[slot].type > 0)
+	IL_0414: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0419: ldfld int32 Terraria.Item::'type'
+	IL_041e: ldc.i4.0
+	IL_041f: bgt.s IL_042c
+
+	IL_0421: ldarg.0
+	IL_0422: ldarg.2
+	IL_0423: ldelem.ref
+	IL_0424: ldfld int32 Terraria.Item::'type'
+	IL_0429: ldc.i4.0
+	IL_042a: ble.s IL_0485
+
+	// Recipe.FindRecipes();
+	IL_042c: call void Terraria.Recipe::FindRecipes()
+	// Main.PlaySound(7);
+	IL_0431: ldc.i4.7
+	IL_0432: ldc.i4.m1
+	IL_0433: ldc.i4.m1
+	IL_0434: ldc.i4.1
+	IL_0435: ldc.r4 1
+	IL_043a: ldc.r4 0.0
+	IL_043f: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_0444: pop
+	// Main.mouseItem.stack--;
+	IL_0445: br.s IL_0485
+
+	IL_0447: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_044c: dup
+	IL_044d: ldfld int32 Terraria.Item::stack
+	IL_0452: ldc.i4.1
+	IL_0453: sub
+	IL_0454: stfld int32 Terraria.Item::stack
+	// inv[slot].SetDefaults(Main.mouseItem.type);
+	IL_0459: ldarg.0
+	IL_045a: ldarg.2
+	IL_045b: ldelem.ref
+	IL_045c: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0461: ldfld int32 Terraria.Item::'type'
+	IL_0466: ldc.i4.0
+	IL_0467: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+	// Recipe.FindRecipes();
+	IL_046c: call void Terraria.Recipe::FindRecipes()
+	// Main.PlaySound(7);
+	IL_0471: ldc.i4.7
+	IL_0472: ldc.i4.m1
+	IL_0473: ldc.i4.m1
+	IL_0474: ldc.i4.1
+	IL_0475: ldc.r4 1
+	IL_047a: ldc.r4 0.0
+	IL_047f: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_0484: pop
+
+	// if (inv[slot].stack > 0)
+	IL_0485: ldarg.0
+	IL_0486: ldarg.2
+	IL_0487: ldelem.ref
+	IL_0488: ldfld int32 Terraria.Item::stack
+	IL_048d: ldc.i4.0
+	IL_048e: ble IL_096d
+
+	// switch (context)
+	IL_0493: ldarg.1
+	IL_0494: brfalse.s IL_04a8
+
+	// (no C# code)
+	IL_0496: ldarg.1
+	IL_0497: ldc.i4.8
+	IL_0498: sub
+	IL_0499: ldc.i4.4
+	IL_049a: ble.un.s IL_04b6
+
+	IL_049c: ldarg.1
+	IL_049d: ldc.i4.s 16
+	IL_049f: sub
+	IL_04a0: ldc.i4.1
+	IL_04a1: ble.un.s IL_04b6
+
+	// AchievementsHelper.NotifyItemPickup(player, inv[slot]);
+	IL_04a3: br IL_096d
+
+	IL_04a8: ldloc.0
+	IL_04a9: ldarg.0
+	IL_04aa: ldarg.2
+	IL_04ab: ldelem.ref
+	IL_04ac: call void Terraria.GameContent.Achievements.AchievementsHelper::NotifyItemPickup(class Terraria.Player, class Terraria.Item)
+	// break;
+	IL_04b1: br IL_096d
+
+	// AchievementsHelper.HandleOnEquip(player, inv[slot], context);
+	IL_04b6: ldloc.0
+	IL_04b7: ldarg.0
+	IL_04b8: ldarg.2
+	IL_04b9: ldelem.ref
+	IL_04ba: ldarg.1
+	IL_04bb: call void Terraria.GameContent.Achievements.AchievementsHelper::HandleOnEquip(class Terraria.Player, class Terraria.Item, int32)
+	// break;
+	IL_04c0: br IL_096d
+
+	// if (Main.mouseItem.stack == 1 && Main.mouseItem.dye > 0 && inv[slot].type > 0 && inv[slot].type != Main.mouseItem.type)
+	IL_04c5: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_04ca: ldfld int32 Terraria.Item::stack
+	IL_04cf: ldc.i4.1
+	IL_04d0: bne.un IL_0569
+
+	IL_04d5: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_04da: ldfld uint8 Terraria.Item::dye
+	IL_04df: ldc.i4.0
+	IL_04e0: ble IL_0569
+
+	IL_04e5: ldarg.0
+	IL_04e6: ldarg.2
+	IL_04e7: ldelem.ref
+	IL_04e8: ldfld int32 Terraria.Item::'type'
+	IL_04ed: ldc.i4.0
+	IL_04ee: ble.s IL_0569
+
+	IL_04f0: ldarg.0
+	IL_04f1: ldarg.2
+	IL_04f2: ldelem.ref
+	IL_04f3: ldfld int32 Terraria.Item::'type'
+	IL_04f8: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_04fd: ldfld int32 Terraria.Item::'type'
+	IL_0502: beq.s IL_0569
+
+	// Utils.Swap(ref inv[slot], ref Main.mouseItem);
+	IL_0504: ldarg.0
+	IL_0505: ldarg.2
+	IL_0506: ldelema Terraria.Item
+	IL_050b: ldsflda class Terraria.Item Terraria.Main::mouseItem
+	IL_0510: call void Terraria.Utils::Swap<class Terraria.Item>(!!0&, !!0&)
+	// Main.PlaySound(7);
+	IL_0515: ldc.i4.7
+	IL_0516: ldc.i4.m1
+	IL_0517: ldc.i4.m1
+	IL_0518: ldc.i4.1
+	IL_0519: ldc.r4 1
+	IL_051e: ldc.r4 0.0
+	IL_0523: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_0528: pop
+	// if (inv[slot].stack > 0)
+	IL_0529: ldarg.0
+	IL_052a: ldarg.2
+	IL_052b: ldelem.ref
+	IL_052c: ldfld int32 Terraria.Item::stack
+	IL_0531: ldc.i4.0
+	IL_0532: ble IL_096d
+
+	// switch (context)
+	IL_0537: ldarg.1
+	IL_0538: brfalse.s IL_054c
+
+	// (no C# code)
+	IL_053a: ldarg.1
+	IL_053b: ldc.i4.8
+	IL_053c: sub
+	IL_053d: ldc.i4.4
+	IL_053e: ble.un.s IL_055a
+
+	IL_0540: ldarg.1
+	IL_0541: ldc.i4.s 16
+	IL_0543: sub
+	IL_0544: ldc.i4.1
+	IL_0545: ble.un.s IL_055a
+
+	// AchievementsHelper.NotifyItemPickup(player, inv[slot]);
+	IL_0547: br IL_096d
+
+	IL_054c: ldloc.0
+	IL_054d: ldarg.0
+	IL_054e: ldarg.2
+	IL_054f: ldelem.ref
+	IL_0550: call void Terraria.GameContent.Achievements.AchievementsHelper::NotifyItemPickup(class Terraria.Player, class Terraria.Item)
+	// break;
+	IL_0555: br IL_096d
+
+	// AchievementsHelper.HandleOnEquip(player, inv[slot], context);
+	IL_055a: ldloc.0
+	IL_055b: ldarg.0
+	IL_055c: ldarg.2
+	IL_055d: ldelem.ref
+	IL_055e: ldarg.1
+	IL_055f: call void Terraria.GameContent.Achievements.AchievementsHelper::HandleOnEquip(class Terraria.Player, class Terraria.Item, int32)
+	// break;
+	IL_0564: br IL_096d
+
+	// else if (Main.mouseItem.type == 0 && inv[slot].type > 0)
+	IL_0569: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_056e: ldfld int32 Terraria.Item::'type'
+	IL_0573: brtrue IL_0610
+
+	IL_0578: ldarg.0
+	IL_0579: ldarg.2
+	IL_057a: ldelem.ref
+	IL_057b: ldfld int32 Terraria.Item::'type'
+	IL_0580: ldc.i4.0
+	IL_0581: ble IL_0610
+
+	// Utils.Swap(ref inv[slot], ref Main.mouseItem);
+	IL_0586: ldarg.0
+	IL_0587: ldarg.2
+	IL_0588: ldelema Terraria.Item
+	IL_058d: ldsflda class Terraria.Item Terraria.Main::mouseItem
+	IL_0592: call void Terraria.Utils::Swap<class Terraria.Item>(!!0&, !!0&)
+	// if (inv[slot].type == 0 || inv[slot].stack < 1)
+	IL_0597: ldarg.0
+	IL_0598: ldarg.2
+	IL_0599: ldelem.ref
+	IL_059a: ldfld int32 Terraria.Item::'type'
+	IL_059f: brfalse.s IL_05ac
+
+	IL_05a1: ldarg.0
+	IL_05a2: ldarg.2
+	IL_05a3: ldelem.ref
+	IL_05a4: ldfld int32 Terraria.Item::stack
+	IL_05a9: ldc.i4.1
+	IL_05aa: bge.s IL_05b4
+
+	// inv[slot] = new Item();
+	IL_05ac: ldarg.0
+	IL_05ad: ldarg.2
+	IL_05ae: newobj instance void Terraria.Item::.ctor()
+	IL_05b3: stelem.ref
+
+	// if (Main.mouseItem.type == 0 || Main.mouseItem.stack < 1)
+	IL_05b4: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_05b9: ldfld int32 Terraria.Item::'type'
+	IL_05be: brfalse.s IL_05cd
+
+	IL_05c0: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_05c5: ldfld int32 Terraria.Item::stack
+	IL_05ca: ldc.i4.1
+	IL_05cb: bge.s IL_05d7
+
+	// Main.mouseItem = new Item();
+	IL_05cd: newobj instance void Terraria.Item::.ctor()
+	IL_05d2: stsfld class Terraria.Item Terraria.Main::mouseItem
+
+	// if (Main.mouseItem.type > 0 || inv[slot].type > 0)
+	IL_05d7: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_05dc: ldfld int32 Terraria.Item::'type'
+	IL_05e1: ldc.i4.0
+	IL_05e2: bgt.s IL_05f2
+
+	IL_05e4: ldarg.0
+	IL_05e5: ldarg.2
+	IL_05e6: ldelem.ref
+	IL_05e7: ldfld int32 Terraria.Item::'type'
+	IL_05ec: ldc.i4.0
+	IL_05ed: ble IL_096d
+
+	// Recipe.FindRecipes();
+	IL_05f2: call void Terraria.Recipe::FindRecipes()
+	// Main.PlaySound(7);
+	IL_05f7: ldc.i4.7
+	IL_05f8: ldc.i4.m1
+	IL_05f9: ldc.i4.m1
+	IL_05fa: ldc.i4.1
+	IL_05fb: ldc.r4 1
+	IL_0600: ldc.r4 0.0
+	IL_0605: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_060a: pop
+	// if (Main.mouseItem.dye <= 0 || inv[slot].type != 0)
+	IL_060b: br IL_096d
+
+	IL_0610: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0615: ldfld uint8 Terraria.Item::dye
+	IL_061a: ldc.i4.0
+	IL_061b: ble IL_096d
+
+	IL_0620: ldarg.0
+	IL_0621: ldarg.2
+	IL_0622: ldelem.ref
+	IL_0623: ldfld int32 Terraria.Item::'type'
+	IL_0628: brtrue IL_096d
+
+	// if (Main.mouseItem.stack == 1)
+	IL_062d: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0632: ldfld int32 Terraria.Item::stack
+	IL_0637: ldc.i4.1
+	IL_0638: bne.un IL_06c1
+
+	// Utils.Swap(ref inv[slot], ref Main.mouseItem);
+	IL_063d: ldarg.0
+	IL_063e: ldarg.2
+	IL_063f: ldelema Terraria.Item
+	IL_0644: ldsflda class Terraria.Item Terraria.Main::mouseItem
+	IL_0649: call void Terraria.Utils::Swap<class Terraria.Item>(!!0&, !!0&)
+	// if (inv[slot].type == 0 || inv[slot].stack < 1)
+	IL_064e: ldarg.0
+	IL_064f: ldarg.2
+	IL_0650: ldelem.ref
+	IL_0651: ldfld int32 Terraria.Item::'type'
+	IL_0656: brfalse.s IL_0663
+
+	IL_0658: ldarg.0
+	IL_0659: ldarg.2
+	IL_065a: ldelem.ref
+	IL_065b: ldfld int32 Terraria.Item::stack
+	IL_0660: ldc.i4.1
+	IL_0661: bge.s IL_066b
+
+	// inv[slot] = new Item();
+	IL_0663: ldarg.0
+	IL_0664: ldarg.2
+	IL_0665: newobj instance void Terraria.Item::.ctor()
+	IL_066a: stelem.ref
+
+	// if (Main.mouseItem.type == 0 || Main.mouseItem.stack < 1)
+	IL_066b: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0670: ldfld int32 Terraria.Item::'type'
+	IL_0675: brfalse.s IL_0684
+
+	IL_0677: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_067c: ldfld int32 Terraria.Item::stack
+	IL_0681: ldc.i4.1
+	IL_0682: bge.s IL_068e
+
+	// Main.mouseItem = new Item();
+	IL_0684: newobj instance void Terraria.Item::.ctor()
+	IL_0689: stsfld class Terraria.Item Terraria.Main::mouseItem
+
+	// if (Main.mouseItem.type > 0 || inv[slot].type > 0)
+	IL_068e: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0693: ldfld int32 Terraria.Item::'type'
+	IL_0698: ldc.i4.0
+	IL_0699: bgt.s IL_06a6
+
+	IL_069b: ldarg.0
+	IL_069c: ldarg.2
+	IL_069d: ldelem.ref
+	IL_069e: ldfld int32 Terraria.Item::'type'
+	IL_06a3: ldc.i4.0
+	IL_06a4: ble.s IL_06ff
+
+	// Recipe.FindRecipes();
+	IL_06a6: call void Terraria.Recipe::FindRecipes()
+	// Main.PlaySound(7);
+	IL_06ab: ldc.i4.7
+	IL_06ac: ldc.i4.m1
+	IL_06ad: ldc.i4.m1
+	IL_06ae: ldc.i4.1
+	IL_06af: ldc.r4 1
+	IL_06b4: ldc.r4 0.0
+	IL_06b9: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_06be: pop
+	// Main.mouseItem.stack--;
+	IL_06bf: br.s IL_06ff
+
+	IL_06c1: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_06c6: dup
+	IL_06c7: ldfld int32 Terraria.Item::stack
+	IL_06cc: ldc.i4.1
+	IL_06cd: sub
+	IL_06ce: stfld int32 Terraria.Item::stack
+	// inv[slot].SetDefaults(Main.mouseItem.type);
+	IL_06d3: ldarg.0
+	IL_06d4: ldarg.2
+	IL_06d5: ldelem.ref
+	IL_06d6: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_06db: ldfld int32 Terraria.Item::'type'
+	IL_06e0: ldc.i4.0
+	IL_06e1: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+	// Recipe.FindRecipes();
+	IL_06e6: call void Terraria.Recipe::FindRecipes()
+	// Main.PlaySound(7);
+	IL_06eb: ldc.i4.7
+	IL_06ec: ldc.i4.m1
+	IL_06ed: ldc.i4.m1
+	IL_06ee: ldc.i4.1
+	IL_06ef: ldc.r4 1
+	IL_06f4: ldc.r4 0.0
+	IL_06f9: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_06fe: pop
+
+	// if (inv[slot].stack > 0)
+	IL_06ff: ldarg.0
+	IL_0700: ldarg.2
+	IL_0701: ldelem.ref
+	IL_0702: ldfld int32 Terraria.Item::stack
+	IL_0707: ldc.i4.0
+	IL_0708: ble IL_096d
+
+	// switch (context)
+	IL_070d: ldarg.1
+	IL_070e: brfalse.s IL_0722
+
+	// (no C# code)
+	IL_0710: ldarg.1
+	IL_0711: ldc.i4.8
+	IL_0712: sub
+	IL_0713: ldc.i4.4
+	IL_0714: ble.un.s IL_0730
+
+	IL_0716: ldarg.1
+	IL_0717: ldc.i4.s 16
+	IL_0719: sub
+	IL_071a: ldc.i4.1
+	IL_071b: ble.un.s IL_0730
+
+	// AchievementsHelper.NotifyItemPickup(player, inv[slot]);
+	IL_071d: br IL_096d
+
+	IL_0722: ldloc.0
+	IL_0723: ldarg.0
+	IL_0724: ldarg.2
+	IL_0725: ldelem.ref
+	IL_0726: call void Terraria.GameContent.Achievements.AchievementsHelper::NotifyItemPickup(class Terraria.Player, class Terraria.Item)
+	// break;
+	IL_072b: br IL_096d
+
+	// AchievementsHelper.HandleOnEquip(player, inv[slot], context);
+	IL_0730: ldloc.0
+	IL_0731: ldarg.0
+	IL_0732: ldarg.2
+	IL_0733: ldelem.ref
+	IL_0734: ldarg.1
+	IL_0735: call void Terraria.GameContent.Achievements.AchievementsHelper::HandleOnEquip(class Terraria.Player, class Terraria.Item, int32)
+	// break;
+	IL_073a: br IL_096d
+
+	// if (PlayerHooks.CanBuyItem(player, Main.npc[player.talkNPC], inv, inv[slot]))
+	IL_073f: ldloc.0
+	IL_0740: ldsfld class Terraria.NPC[] Terraria.Main::npc
+	IL_0745: ldloc.0
+	IL_0746: ldfld int32 Terraria.Player::talkNPC
+	IL_074b: ldelem.ref
+	IL_074c: ldarg.0
+	IL_074d: ldarg.0
+	IL_074e: ldarg.2
+	IL_074f: ldelem.ref
+	IL_0750: call bool Terraria.ModLoader.PlayerHooks::CanBuyItem(class Terraria.Player, class Terraria.NPC, class Terraria.Item[], class Terraria.Item)
+	IL_0755: brfalse IL_096d
+
+	// Main.mouseItem = inv[slot].Clone();
+	IL_075a: ldarg.0
+	IL_075b: ldarg.2
+	IL_075c: ldelem.ref
+	IL_075d: callvirt instance class Terraria.Item Terraria.Item::Clone()
+	IL_0762: stsfld class Terraria.Item Terraria.Main::mouseItem
+	// Main.mouseItem.stack = 1;
+	IL_0767: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_076c: ldc.i4.1
+	IL_076d: stfld int32 Terraria.Item::stack
+	// if (inv[slot].buyOnce)
+	IL_0772: ldarg.0
+	IL_0773: ldarg.2
+	IL_0774: ldelem.ref
+	IL_0775: ldfld bool Terraria.Item::buyOnce
+	IL_077a: brfalse.s IL_0790
+
+	// Main.mouseItem.value *= 5;
+	IL_077c: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0781: dup
+	IL_0782: ldfld int32 Terraria.Item::'value'
+	IL_0787: ldc.i4.5
+	IL_0788: mul
+	IL_0789: stfld int32 Terraria.Item::'value'
+	// Main.mouseItem.Prefix(-1);
+	IL_078e: br.s IL_079c
+
+	IL_0790: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0795: ldc.i4.m1
+	IL_0796: callvirt instance bool Terraria.Item::Prefix(int32)
+	IL_079b: pop
+
+	// Main.mouseItem.position = player.Center - new Vector2(Main.mouseItem.width, Main.mouseItem.headSlot) / 2f;
+	IL_079c: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_07a1: ldloc.0
+	IL_07a2: callvirt instance valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2 Terraria.Entity::get_Center()
+	IL_07a7: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_07ac: ldfld int32 Terraria.Entity::width
+	IL_07b1: conv.r4
+	IL_07b2: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_07b7: ldfld int32 Terraria.Item::headSlot
+	IL_07bc: conv.r4
+	IL_07bd: newobj instance void [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2::.ctor(float32, float32)
+	IL_07c2: ldc.r4 2
+	IL_07c7: call valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2 [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2::op_Division(valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2, float32)
+	IL_07cc: call valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2 [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2::op_Subtraction(valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2, valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2)
+	IL_07d1: stfld valuetype [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Vector2 Terraria.Entity::position
+	// ItemText.NewText(Main.mouseItem, Main.mouseItem.stack);
+	IL_07d6: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_07db: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_07e0: ldfld int32 Terraria.Item::stack
+	IL_07e5: ldc.i4.0
+	IL_07e6: ldc.i4.0
+	IL_07e7: call void Terraria.ItemText::NewText(class Terraria.Item, int32, bool, bool)
+	// if (inv[slot].buyOnce && --inv[slot].stack <= 0)
+	IL_07ec: ldarg.0
+	IL_07ed: ldarg.2
+	IL_07ee: ldelem.ref
+	IL_07ef: ldfld bool Terraria.Item::buyOnce
+	IL_07f4: brfalse.s IL_0819
+
+	IL_07f6: ldarg.0
+	IL_07f7: ldarg.2
+	IL_07f8: ldelem.ref
+	IL_07f9: dup
+	IL_07fa: ldfld int32 Terraria.Item::stack
+	IL_07ff: ldc.i4.1
+	IL_0800: sub
+	IL_0801: stloc.s 4
+	IL_0803: ldloc.s 4
+	IL_0805: stfld int32 Terraria.Item::stack
+	// inv[slot].SetDefaults();
+	IL_080a: ldloc.s 4
+	IL_080c: ldc.i4.0
+	IL_080d: bgt.s IL_0819
+
+	IL_080f: ldarg.0
+	IL_0810: ldarg.2
+	IL_0811: ldelem.ref
+	IL_0812: ldc.i4.0
+	IL_0813: ldc.i4.0
+	IL_0814: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+
+	// if (inv[slot].value > 0)
+	IL_0819: ldarg.0
+	IL_081a: ldarg.2
+	IL_081b: ldelem.ref
+	IL_081c: ldfld int32 Terraria.Item::'value'
+	IL_0821: ldc.i4.0
+	IL_0822: ble.s IL_083b
+
+	// Main.PlaySound(18);
+	IL_0824: ldc.i4.s 18
+	IL_0826: ldc.i4.m1
+	IL_0827: ldc.i4.m1
+	IL_0828: ldc.i4.1
+	IL_0829: ldc.r4 1
+	IL_082e: ldc.r4 0.0
+	IL_0833: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_0838: pop
+	// Main.PlaySound(7);
+	IL_0839: br.s IL_084f
+
+	IL_083b: ldc.i4.7
+	IL_083c: ldc.i4.m1
+	IL_083d: ldc.i4.m1
+	IL_083e: ldc.i4.1
+	IL_083f: ldc.r4 1
+	IL_0844: ldc.r4 0.0
+	IL_0849: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_084e: pop
+
+	// PlayerHooks.PostBuyItem(player, Main.npc[player.talkNPC], inv, Main.mouseItem);
+	IL_084f: ldloc.0
+	IL_0850: ldsfld class Terraria.NPC[] Terraria.Main::npc
+	IL_0855: ldloc.0
+	IL_0856: ldfld int32 Terraria.Player::talkNPC
+	IL_085b: ldelem.ref
+	IL_085c: ldarg.0
+	IL_085d: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0862: call void Terraria.ModLoader.PlayerHooks::PostBuyItem(class Terraria.Player, class Terraria.NPC, class Terraria.Item[], class Terraria.Item)
+	// break;
+	IL_0867: br IL_096d
+
+	// if (PlayerHooks.CanSellItem(player, Main.npc[player.talkNPC], inv, Main.mouseItem))
+	IL_086c: ldloc.0
+	IL_086d: ldsfld class Terraria.NPC[] Terraria.Main::npc
+	IL_0872: ldloc.0
+	IL_0873: ldfld int32 Terraria.Player::talkNPC
+	IL_0878: ldelem.ref
+	IL_0879: ldarg.0
+	IL_087a: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_087f: call bool Terraria.ModLoader.PlayerHooks::CanSellItem(class Terraria.Player, class Terraria.NPC, class Terraria.Item[], class Terraria.Item)
+	IL_0884: brfalse IL_096d
+
+	// Chest chest = Main.instance.shop[Main.npcShop];
+	IL_0889: ldsfld class Terraria.Main Terraria.Main::'instance'
+	IL_088e: ldfld class Terraria.Chest[] Terraria.Main::shop
+	IL_0893: ldsfld int32 Terraria.Main::npcShop
+	IL_0898: ldelem.ref
+	IL_0899: stloc.s 5
+	// if (player.SellItem(Main.mouseItem.value, Main.mouseItem.stack))
+	IL_089b: ldloc.0
+	IL_089c: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_08a1: ldfld int32 Terraria.Item::'value'
+	IL_08a6: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_08ab: ldfld int32 Terraria.Item::stack
+	IL_08b0: callvirt instance bool Terraria.Player::SellItem(int32, int32)
+	IL_08b5: brfalse.s IL_090b
+
+	// int num = chest.AddShop(Main.mouseItem);
+	IL_08b7: ldloc.s 5
+	IL_08b9: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_08be: callvirt instance int32 Terraria.Chest::AddShop(class Terraria.Item)
+	IL_08c3: stloc.s 6
+	// Main.mouseItem.SetDefaults();
+	IL_08c5: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_08ca: ldc.i4.0
+	IL_08cb: ldc.i4.0
+	IL_08cc: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+	// Main.PlaySound(18);
+	IL_08d1: ldc.i4.s 18
+	IL_08d3: ldc.i4.m1
+	IL_08d4: ldc.i4.m1
+	IL_08d5: ldc.i4.1
+	IL_08d6: ldc.r4 1
+	IL_08db: ldc.r4 0.0
+	IL_08e0: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_08e5: pop
+	// PlayerHooks.PostSellItem(player, Main.npc[player.talkNPC], chest.item, chest.item[num]);
+	IL_08e6: ldloc.0
+	IL_08e7: ldsfld class Terraria.NPC[] Terraria.Main::npc
+	IL_08ec: ldloc.0
+	IL_08ed: ldfld int32 Terraria.Player::talkNPC
+	IL_08f2: ldelem.ref
+	IL_08f3: ldloc.s 5
+	IL_08f5: ldfld class Terraria.Item[] Terraria.Chest::item
+	IL_08fa: ldloc.s 5
+	IL_08fc: ldfld class Terraria.Item[] Terraria.Chest::item
+	IL_0901: ldloc.s 6
+	IL_0903: ldelem.ref
+	IL_0904: call void Terraria.ModLoader.PlayerHooks::PostSellItem(class Terraria.Player, class Terraria.NPC, class Terraria.Item[], class Terraria.Item)
+	// else if (Main.mouseItem.value == 0)
+	IL_0909: br.s IL_0968
+
+	IL_090b: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_0910: ldfld int32 Terraria.Item::'value'
+	IL_0915: brtrue.s IL_0968
+
+	// int num2 = chest.AddShop(Main.mouseItem);
+	IL_0917: ldloc.s 5
+	IL_0919: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_091e: callvirt instance int32 Terraria.Chest::AddShop(class Terraria.Item)
+	IL_0923: stloc.s 7
+	// Main.mouseItem.SetDefaults();
+	IL_0925: ldsfld class Terraria.Item Terraria.Main::mouseItem
+	IL_092a: ldc.i4.0
+	IL_092b: ldc.i4.0
+	IL_092c: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+	// Main.PlaySound(7);
+	IL_0931: ldc.i4.7
+	IL_0932: ldc.i4.m1
+	IL_0933: ldc.i4.m1
+	IL_0934: ldc.i4.1
+	IL_0935: ldc.r4 1
+	IL_093a: ldc.r4 0.0
+	IL_093f: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+	IL_0944: pop
+	// PlayerHooks.PostSellItem(player, Main.npc[player.talkNPC], chest.item, chest.item[num2]);
+	IL_0945: ldloc.0
+	IL_0946: ldsfld class Terraria.NPC[] Terraria.Main::npc
+	IL_094b: ldloc.0
+	IL_094c: ldfld int32 Terraria.Player::talkNPC
+	IL_0951: ldelem.ref
+	IL_0952: ldloc.s 5
+	IL_0954: ldfld class Terraria.Item[] Terraria.Chest::item
+	IL_0959: ldloc.s 5
+	IL_095b: ldfld class Terraria.Item[] Terraria.Chest::item
+	IL_0960: ldloc.s 7
+	IL_0962: ldelem.ref
+	IL_0963: call void Terraria.ModLoader.PlayerHooks::PostSellItem(class Terraria.Player, class Terraria.NPC, class Terraria.Item[], class Terraria.Item)
+
+	// Recipe.FindRecipes();
+	IL_0968: call void Terraria.Recipe::FindRecipes()
+
+	// if ((uint)context > 2u && context != 5)
+	IL_096d: ldarg.1
+	IL_096e: ldc.i4.2
+	IL_096f: ble.un.s IL_097e
+
+	IL_0971: ldarg.1
+	IL_0972: ldc.i4.5
+	IL_0973: beq.s IL_097e
+
+	// inv[slot].favorited = false;
+	IL_0975: ldarg.0
+	IL_0976: ldarg.2
+	IL_0977: ldelem.ref
+	IL_0978: ldc.i4.0
+	IL_0979: stfld bool Terraria.Item::favorited
+
+	// (no C# code)
+	IL_097e: ret
+} // end of method ItemSlot::LeftClick

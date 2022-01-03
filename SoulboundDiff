@@ -1,0 +1,1121 @@
+*** this is the diff related to SoulboundItemRestrictions
+
+for reference the il edit is: 
+
+IL.Terraria.UI.ChestUI.DepositAll += PreventSoulboundStack;
+
+        private void PreventSoulboundStack(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+
+            c.TryGotoNext(i => i.MatchLdloc(1), i => i.MatchLdcI4(1), i => i.MatchSub());
+            Instruction target = c.Prev.Previous;
+
+            c.TryGotoPrev(n => n.MatchLdfld<Item>("favorited"));
+            c.Index++;
+
+            c.Emit(OpCodes.Ldloc_0);
+            c.EmitDelegate<SoulboundDelegate>(EmitSoulboundDel);
+            c.Emit(OpCodes.Brtrue_S, target);
+        }
+***
+
+--windows version of ChestUI.DepositAll
+
+.method public hidebysig static 
+	void DepositAll () cil managed 
+{
+	// Method begins at RVA 0x3b729c
+	// Code size 2273 (0x8e1)
+	.maxstack 11
+	.locals init (
+		[0] class Terraria.Player,
+		[1] int32,
+		[2] int32,
+		[3] class Terraria.Chest,
+		[4] int32,
+		[5] int32,
+		[6] int32,
+		[7] int32,
+		[8] int32,
+		[9] int32,
+		[10] int32,
+		[11] int32
+	)
+
+	// Player player = Main.player[Main.myPlayer];
+	IL_0000: ldsfld class Terraria.Player[] Terraria.Main::player
+	IL_0005: ldsfld int32 Terraria.Main::myPlayer
+	IL_000a: ldelem.ref
+	IL_000b: stloc.0
+	// if (player.chest > -1)
+	IL_000c: ldloc.0
+	IL_000d: ldfld int32 Terraria.Player::chest
+	IL_0012: ldc.i4.m1
+	IL_0013: ble.s IL_0033
+
+	// MoveCoins(player.inventory, Main.chest[player.chest].item);
+	IL_0015: ldloc.0
+	IL_0016: ldfld class Terraria.Item[] Terraria.Player::inventory
+	IL_001b: ldsfld class Terraria.Chest[] Terraria.Main::chest
+	IL_0020: ldloc.0
+	IL_0021: ldfld int32 Terraria.Player::chest
+	IL_0026: ldelem.ref
+	IL_0027: ldfld class Terraria.Item[] Terraria.Chest::item
+	IL_002c: call void Terraria.UI.ChestUI::MoveCoins(class Terraria.Item[], class Terraria.Item[])
+	// else if (player.chest == -3)
+	IL_0031: br.s IL_008d
+
+	IL_0033: ldloc.0
+	IL_0034: ldfld int32 Terraria.Player::chest
+	IL_0039: ldc.i4.s -3
+	IL_003b: bne.un.s IL_0055
+
+	// MoveCoins(player.inventory, player.bank2.item);
+	IL_003d: ldloc.0
+	IL_003e: ldfld class Terraria.Item[] Terraria.Player::inventory
+	IL_0043: ldloc.0
+	IL_0044: ldfld class Terraria.Chest Terraria.Player::bank2
+	IL_0049: ldfld class Terraria.Item[] Terraria.Chest::item
+	IL_004e: call void Terraria.UI.ChestUI::MoveCoins(class Terraria.Item[], class Terraria.Item[])
+	// else if (player.chest == -4)
+	IL_0053: br.s IL_008d
+
+	IL_0055: ldloc.0
+	IL_0056: ldfld int32 Terraria.Player::chest
+	IL_005b: ldc.i4.s -4
+	IL_005d: bne.un.s IL_0077
+
+	// MoveCoins(player.inventory, player.bank3.item);
+	IL_005f: ldloc.0
+	IL_0060: ldfld class Terraria.Item[] Terraria.Player::inventory
+	IL_0065: ldloc.0
+	IL_0066: ldfld class Terraria.Chest Terraria.Player::bank3
+	IL_006b: ldfld class Terraria.Item[] Terraria.Chest::item
+	IL_0070: call void Terraria.UI.ChestUI::MoveCoins(class Terraria.Item[], class Terraria.Item[])
+	// MoveCoins(player.inventory, player.bank.item);
+	IL_0075: br.s IL_008d
+
+	IL_0077: ldloc.0
+	IL_0078: ldfld class Terraria.Item[] Terraria.Player::inventory
+	IL_007d: ldloc.0
+	IL_007e: ldfld class Terraria.Chest Terraria.Player::bank
+	IL_0083: ldfld class Terraria.Item[] Terraria.Chest::item
+	IL_0088: call void Terraria.UI.ChestUI::MoveCoins(class Terraria.Item[], class Terraria.Item[])
+
+	// for (int num = 49; num >= 10; num--)
+	IL_008d: ldc.i4.s 49
+	IL_008f: stloc.1
+	// if (player.inventory[num].stack > 0 && player.inventory[num].type > 0 && !player.inventory[num].favorited)
+	IL_0090: br IL_08d8
+	// loop start (head: IL_08d8)
+		IL_0095: ldloc.0
+		IL_0096: ldfld class Terraria.Item[] Terraria.Player::inventory
+		IL_009b: ldloc.1
+		IL_009c: ldelem.ref
+		IL_009d: ldfld int32 Terraria.Item::stack
+		IL_00a2: ldc.i4.0
+		IL_00a3: ble IL_08d4
+
+		IL_00a8: ldloc.0
+		IL_00a9: ldfld class Terraria.Item[] Terraria.Player::inventory
+		IL_00ae: ldloc.1
+		IL_00af: ldelem.ref
+		IL_00b0: ldfld int32 Terraria.Item::'type'
+		IL_00b5: ldc.i4.0
+		IL_00b6: ble IL_08d4
+
+		IL_00bb: ldloc.0
+		IL_00bc: ldfld class Terraria.Item[] Terraria.Player::inventory
+		IL_00c1: ldloc.1
+		IL_00c2: ldelem.ref
+		IL_00c3: ldfld bool Terraria.Item::favorited
+		IL_00c8: brtrue IL_08d4
+
+		// if (player.inventory[num].maxStack > 1)
+		IL_00cd: ldloc.0
+		IL_00ce: ldfld class Terraria.Item[] Terraria.Player::inventory
+		IL_00d3: ldloc.1
+		IL_00d4: ldelem.ref
+		IL_00d5: ldfld int32 Terraria.Item::maxStack
+		IL_00da: ldc.i4.1
+		IL_00db: ble IL_06ba
+
+		// for (int i = 0; i < 40; i++)
+		IL_00e0: ldc.i4.0
+		IL_00e1: stloc.2
+		// if (player.chest > -1)
+		IL_00e2: br IL_06b2
+		// loop start (head: IL_06b2)
+			IL_00e7: ldloc.0
+			IL_00e8: ldfld int32 Terraria.Player::chest
+			IL_00ed: ldc.i4.m1
+			IL_00ee: ble IL_027f
+
+			// Chest chest = Main.chest[player.chest];
+			IL_00f3: ldsfld class Terraria.Chest[] Terraria.Main::chest
+			IL_00f8: ldloc.0
+			IL_00f9: ldfld int32 Terraria.Player::chest
+			IL_00fe: ldelem.ref
+			IL_00ff: stloc.3
+			// if (chest.item[i].stack >= chest.item[i].maxStack || !player.inventory[num].IsTheSameAs(chest.item[i]))
+			IL_0100: ldloc.3
+			IL_0101: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0106: ldloc.2
+			IL_0107: ldelem.ref
+			IL_0108: ldfld int32 Terraria.Item::stack
+			IL_010d: ldloc.3
+			IL_010e: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0113: ldloc.2
+			IL_0114: ldelem.ref
+			IL_0115: ldfld int32 Terraria.Item::maxStack
+			IL_011a: bge IL_06ae
+
+			IL_011f: ldloc.0
+			IL_0120: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0125: ldloc.1
+			IL_0126: ldelem.ref
+			IL_0127: ldloc.3
+			IL_0128: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_012d: ldloc.2
+			IL_012e: ldelem.ref
+			IL_012f: callvirt instance bool Terraria.Item::IsTheSameAs(class Terraria.Item)
+			IL_0134: brfalse IL_06ae
+
+			// int num2 = player.inventory[num].stack;
+			IL_0139: ldloc.0
+			IL_013a: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_013f: ldloc.1
+			IL_0140: ldelem.ref
+			IL_0141: ldfld int32 Terraria.Item::stack
+			IL_0146: stloc.s 4
+			// if (player.inventory[num].stack + chest.item[i].stack > chest.item[i].maxStack)
+			IL_0148: ldloc.0
+			IL_0149: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_014e: ldloc.1
+			IL_014f: ldelem.ref
+			IL_0150: ldfld int32 Terraria.Item::stack
+			IL_0155: ldloc.3
+			IL_0156: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_015b: ldloc.2
+			IL_015c: ldelem.ref
+			IL_015d: ldfld int32 Terraria.Item::stack
+			IL_0162: add
+			IL_0163: ldloc.3
+			IL_0164: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0169: ldloc.2
+			IL_016a: ldelem.ref
+			IL_016b: ldfld int32 Terraria.Item::maxStack
+			IL_0170: ble.s IL_018f
+
+			// num2 = chest.item[i].maxStack - chest.item[i].stack;
+			IL_0172: ldloc.3
+			IL_0173: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0178: ldloc.2
+			IL_0179: ldelem.ref
+			IL_017a: ldfld int32 Terraria.Item::maxStack
+			IL_017f: ldloc.3
+			IL_0180: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0185: ldloc.2
+			IL_0186: ldelem.ref
+			IL_0187: ldfld int32 Terraria.Item::stack
+			IL_018c: sub
+			IL_018d: stloc.s 4
+
+			// player.inventory[num].stack -= num2;
+			IL_018f: ldloc.0
+			IL_0190: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0195: ldloc.1
+			IL_0196: ldelem.ref
+			IL_0197: dup
+			IL_0198: ldfld int32 Terraria.Item::stack
+			IL_019d: ldloc.s 4
+			IL_019f: sub
+			IL_01a0: stfld int32 Terraria.Item::stack
+			// chest.item[i].stack += num2;
+			IL_01a5: ldloc.3
+			IL_01a6: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_01ab: ldloc.2
+			IL_01ac: ldelem.ref
+			IL_01ad: dup
+			IL_01ae: ldfld int32 Terraria.Item::stack
+			IL_01b3: ldloc.s 4
+			IL_01b5: add
+			IL_01b6: stfld int32 Terraria.Item::stack
+			// Main.PlaySound(7);
+			IL_01bb: ldc.i4.7
+			IL_01bc: ldc.i4.m1
+			IL_01bd: ldc.i4.m1
+			IL_01be: ldc.i4.1
+			IL_01bf: ldc.r4 1
+			IL_01c4: ldc.r4 0.0
+			IL_01c9: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_01ce: pop
+			// if (player.inventory[num].stack <= 0)
+			IL_01cf: ldloc.0
+			IL_01d0: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_01d5: ldloc.1
+			IL_01d6: ldelem.ref
+			IL_01d7: ldfld int32 Terraria.Item::stack
+			IL_01dc: ldc.i4.0
+			IL_01dd: bgt.s IL_021d
+
+			// player.inventory[num].SetDefaults();
+			IL_01df: ldloc.0
+			IL_01e0: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_01e5: ldloc.1
+			IL_01e6: ldelem.ref
+			IL_01e7: ldc.i4.0
+			IL_01e8: ldc.i4.0
+			IL_01e9: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+			// if (Main.netMode == 1)
+			IL_01ee: ldsfld int32 Terraria.Main::netMode
+			IL_01f3: ldc.i4.1
+			IL_01f4: bne.un IL_06ba
+
+			// NetMessage.SendData(32, -1, -1, null, player.chest, i);
+			IL_01f9: ldc.i4.s 32
+			IL_01fb: ldc.i4.m1
+			IL_01fc: ldc.i4.m1
+			IL_01fd: ldnull
+			IL_01fe: ldloc.0
+			IL_01ff: ldfld int32 Terraria.Player::chest
+			IL_0204: ldloc.2
+			IL_0205: conv.r4
+			IL_0206: ldc.r4 0.0
+			IL_020b: ldc.r4 0.0
+			IL_0210: ldc.i4.0
+			IL_0211: ldc.i4.0
+			IL_0212: ldc.i4.0
+			IL_0213: call void Terraria.NetMessage::SendData(int32, int32, int32, class Terraria.Localization.NetworkText, int32, float32, float32, float32, int32, int32, int32)
+			// break;
+			IL_0218: br IL_06ba
+
+			// if (chest.item[i].type == 0)
+			IL_021d: ldloc.3
+			IL_021e: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0223: ldloc.2
+			IL_0224: ldelem.ref
+			IL_0225: ldfld int32 Terraria.Item::'type'
+			IL_022a: brtrue.s IL_0250
+
+			// chest.item[i] = player.inventory[num].Clone();
+			IL_022c: ldloc.3
+			IL_022d: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0232: ldloc.2
+			IL_0233: ldloc.0
+			IL_0234: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0239: ldloc.1
+			IL_023a: ldelem.ref
+			IL_023b: callvirt instance class Terraria.Item Terraria.Item::Clone()
+			IL_0240: stelem.ref
+			// player.inventory[num].SetDefaults();
+			IL_0241: ldloc.0
+			IL_0242: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0247: ldloc.1
+			IL_0248: ldelem.ref
+			IL_0249: ldc.i4.0
+			IL_024a: ldc.i4.0
+			IL_024b: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+
+			// if (Main.netMode == 1)
+			IL_0250: ldsfld int32 Terraria.Main::netMode
+			IL_0255: ldc.i4.1
+			IL_0256: bne.un IL_06ae
+
+			// NetMessage.SendData(32, -1, -1, null, player.chest, i);
+			IL_025b: ldc.i4.s 32
+			IL_025d: ldc.i4.m1
+			IL_025e: ldc.i4.m1
+			IL_025f: ldnull
+			IL_0260: ldloc.0
+			IL_0261: ldfld int32 Terraria.Player::chest
+			IL_0266: ldloc.2
+			IL_0267: conv.r4
+			IL_0268: ldc.r4 0.0
+			IL_026d: ldc.r4 0.0
+			IL_0272: ldc.i4.0
+			IL_0273: ldc.i4.0
+			IL_0274: ldc.i4.0
+			IL_0275: call void Terraria.NetMessage::SendData(int32, int32, int32, class Terraria.Localization.NetworkText, int32, float32, float32, float32, int32, int32, int32)
+			// else if (player.chest == -3)
+			IL_027a: br IL_06ae
+
+			IL_027f: ldloc.0
+			IL_0280: ldfld int32 Terraria.Player::chest
+			IL_0285: ldc.i4.s -3
+			IL_0287: bne.un IL_03ec
+
+			// if (player.bank2.item[i].stack < player.bank2.item[i].maxStack && player.inventory[num].IsTheSameAs(player.bank2.item[i]))
+			IL_028c: ldloc.0
+			IL_028d: ldfld class Terraria.Chest Terraria.Player::bank2
+			IL_0292: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0297: ldloc.2
+			IL_0298: ldelem.ref
+			IL_0299: ldfld int32 Terraria.Item::stack
+			IL_029e: ldloc.0
+			IL_029f: ldfld class Terraria.Chest Terraria.Player::bank2
+			IL_02a4: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_02a9: ldloc.2
+			IL_02aa: ldelem.ref
+			IL_02ab: ldfld int32 Terraria.Item::maxStack
+			IL_02b0: bge IL_06ae
+
+			IL_02b5: ldloc.0
+			IL_02b6: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_02bb: ldloc.1
+			IL_02bc: ldelem.ref
+			IL_02bd: ldloc.0
+			IL_02be: ldfld class Terraria.Chest Terraria.Player::bank2
+			IL_02c3: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_02c8: ldloc.2
+			IL_02c9: ldelem.ref
+			IL_02ca: callvirt instance bool Terraria.Item::IsTheSameAs(class Terraria.Item)
+			IL_02cf: brfalse IL_06ae
+
+			// int num3 = player.inventory[num].stack;
+			IL_02d4: ldloc.0
+			IL_02d5: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_02da: ldloc.1
+			IL_02db: ldelem.ref
+			IL_02dc: ldfld int32 Terraria.Item::stack
+			IL_02e1: stloc.s 5
+			// if (player.inventory[num].stack + player.bank2.item[i].stack > player.bank2.item[i].maxStack)
+			IL_02e3: ldloc.0
+			IL_02e4: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_02e9: ldloc.1
+			IL_02ea: ldelem.ref
+			IL_02eb: ldfld int32 Terraria.Item::stack
+			IL_02f0: ldloc.0
+			IL_02f1: ldfld class Terraria.Chest Terraria.Player::bank2
+			IL_02f6: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_02fb: ldloc.2
+			IL_02fc: ldelem.ref
+			IL_02fd: ldfld int32 Terraria.Item::stack
+			IL_0302: add
+			IL_0303: ldloc.0
+			IL_0304: ldfld class Terraria.Chest Terraria.Player::bank2
+			IL_0309: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_030e: ldloc.2
+			IL_030f: ldelem.ref
+			IL_0310: ldfld int32 Terraria.Item::maxStack
+			IL_0315: ble.s IL_033e
+
+			// num3 = player.bank2.item[i].maxStack - player.bank2.item[i].stack;
+			IL_0317: ldloc.0
+			IL_0318: ldfld class Terraria.Chest Terraria.Player::bank2
+			IL_031d: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0322: ldloc.2
+			IL_0323: ldelem.ref
+			IL_0324: ldfld int32 Terraria.Item::maxStack
+			IL_0329: ldloc.0
+			IL_032a: ldfld class Terraria.Chest Terraria.Player::bank2
+			IL_032f: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0334: ldloc.2
+			IL_0335: ldelem.ref
+			IL_0336: ldfld int32 Terraria.Item::stack
+			IL_033b: sub
+			IL_033c: stloc.s 5
+
+			// player.inventory[num].stack -= num3;
+			IL_033e: ldloc.0
+			IL_033f: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0344: ldloc.1
+			IL_0345: ldelem.ref
+			IL_0346: dup
+			IL_0347: ldfld int32 Terraria.Item::stack
+			IL_034c: ldloc.s 5
+			IL_034e: sub
+			IL_034f: stfld int32 Terraria.Item::stack
+			// player.bank2.item[i].stack += num3;
+			IL_0354: ldloc.0
+			IL_0355: ldfld class Terraria.Chest Terraria.Player::bank2
+			IL_035a: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_035f: ldloc.2
+			IL_0360: ldelem.ref
+			IL_0361: dup
+			IL_0362: ldfld int32 Terraria.Item::stack
+			IL_0367: ldloc.s 5
+			IL_0369: add
+			IL_036a: stfld int32 Terraria.Item::stack
+			// Main.PlaySound(7);
+			IL_036f: ldc.i4.7
+			IL_0370: ldc.i4.m1
+			IL_0371: ldc.i4.m1
+			IL_0372: ldc.i4.1
+			IL_0373: ldc.r4 1
+			IL_0378: ldc.r4 0.0
+			IL_037d: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_0382: pop
+			// if (player.inventory[num].stack <= 0)
+			IL_0383: ldloc.0
+			IL_0384: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0389: ldloc.1
+			IL_038a: ldelem.ref
+			IL_038b: ldfld int32 Terraria.Item::stack
+			IL_0390: ldc.i4.0
+			IL_0391: bgt.s IL_03a7
+
+			// player.inventory[num].SetDefaults();
+			IL_0393: ldloc.0
+			IL_0394: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0399: ldloc.1
+			IL_039a: ldelem.ref
+			IL_039b: ldc.i4.0
+			IL_039c: ldc.i4.0
+			IL_039d: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+			// break;
+			IL_03a2: br IL_06ba
+
+			// if (player.bank2.item[i].type == 0)
+			IL_03a7: ldloc.0
+			IL_03a8: ldfld class Terraria.Chest Terraria.Player::bank2
+			IL_03ad: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_03b2: ldloc.2
+			IL_03b3: ldelem.ref
+			IL_03b4: ldfld int32 Terraria.Item::'type'
+			IL_03b9: brtrue IL_06ae
+
+			// player.bank2.item[i] = player.inventory[num].Clone();
+			IL_03be: ldloc.0
+			IL_03bf: ldfld class Terraria.Chest Terraria.Player::bank2
+			IL_03c4: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_03c9: ldloc.2
+			IL_03ca: ldloc.0
+			IL_03cb: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_03d0: ldloc.1
+			IL_03d1: ldelem.ref
+			IL_03d2: callvirt instance class Terraria.Item Terraria.Item::Clone()
+			IL_03d7: stelem.ref
+			// player.inventory[num].SetDefaults();
+			IL_03d8: ldloc.0
+			IL_03d9: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_03de: ldloc.1
+			IL_03df: ldelem.ref
+			IL_03e0: ldc.i4.0
+			IL_03e1: ldc.i4.0
+			IL_03e2: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+			// else if (player.chest == -4)
+			IL_03e7: br IL_06ae
+
+			IL_03ec: ldloc.0
+			IL_03ed: ldfld int32 Terraria.Player::chest
+			IL_03f2: ldc.i4.s -4
+			IL_03f4: bne.un IL_0559
+
+			// if (player.bank3.item[i].stack < player.bank3.item[i].maxStack && player.inventory[num].IsTheSameAs(player.bank3.item[i]))
+			IL_03f9: ldloc.0
+			IL_03fa: ldfld class Terraria.Chest Terraria.Player::bank3
+			IL_03ff: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0404: ldloc.2
+			IL_0405: ldelem.ref
+			IL_0406: ldfld int32 Terraria.Item::stack
+			IL_040b: ldloc.0
+			IL_040c: ldfld class Terraria.Chest Terraria.Player::bank3
+			IL_0411: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0416: ldloc.2
+			IL_0417: ldelem.ref
+			IL_0418: ldfld int32 Terraria.Item::maxStack
+			IL_041d: bge IL_06ae
+
+			IL_0422: ldloc.0
+			IL_0423: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0428: ldloc.1
+			IL_0429: ldelem.ref
+			IL_042a: ldloc.0
+			IL_042b: ldfld class Terraria.Chest Terraria.Player::bank3
+			IL_0430: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0435: ldloc.2
+			IL_0436: ldelem.ref
+			IL_0437: callvirt instance bool Terraria.Item::IsTheSameAs(class Terraria.Item)
+			IL_043c: brfalse IL_06ae
+
+			// int num4 = player.inventory[num].stack;
+			IL_0441: ldloc.0
+			IL_0442: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0447: ldloc.1
+			IL_0448: ldelem.ref
+			IL_0449: ldfld int32 Terraria.Item::stack
+			IL_044e: stloc.s 6
+			// if (player.inventory[num].stack + player.bank3.item[i].stack > player.bank3.item[i].maxStack)
+			IL_0450: ldloc.0
+			IL_0451: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0456: ldloc.1
+			IL_0457: ldelem.ref
+			IL_0458: ldfld int32 Terraria.Item::stack
+			IL_045d: ldloc.0
+			IL_045e: ldfld class Terraria.Chest Terraria.Player::bank3
+			IL_0463: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0468: ldloc.2
+			IL_0469: ldelem.ref
+			IL_046a: ldfld int32 Terraria.Item::stack
+			IL_046f: add
+			IL_0470: ldloc.0
+			IL_0471: ldfld class Terraria.Chest Terraria.Player::bank3
+			IL_0476: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_047b: ldloc.2
+			IL_047c: ldelem.ref
+			IL_047d: ldfld int32 Terraria.Item::maxStack
+			IL_0482: ble.s IL_04ab
+
+			// num4 = player.bank3.item[i].maxStack - player.bank3.item[i].stack;
+			IL_0484: ldloc.0
+			IL_0485: ldfld class Terraria.Chest Terraria.Player::bank3
+			IL_048a: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_048f: ldloc.2
+			IL_0490: ldelem.ref
+			IL_0491: ldfld int32 Terraria.Item::maxStack
+			IL_0496: ldloc.0
+			IL_0497: ldfld class Terraria.Chest Terraria.Player::bank3
+			IL_049c: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_04a1: ldloc.2
+			IL_04a2: ldelem.ref
+			IL_04a3: ldfld int32 Terraria.Item::stack
+			IL_04a8: sub
+			IL_04a9: stloc.s 6
+
+			// player.inventory[num].stack -= num4;
+			IL_04ab: ldloc.0
+			IL_04ac: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_04b1: ldloc.1
+			IL_04b2: ldelem.ref
+			IL_04b3: dup
+			IL_04b4: ldfld int32 Terraria.Item::stack
+			IL_04b9: ldloc.s 6
+			IL_04bb: sub
+			IL_04bc: stfld int32 Terraria.Item::stack
+			// player.bank3.item[i].stack += num4;
+			IL_04c1: ldloc.0
+			IL_04c2: ldfld class Terraria.Chest Terraria.Player::bank3
+			IL_04c7: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_04cc: ldloc.2
+			IL_04cd: ldelem.ref
+			IL_04ce: dup
+			IL_04cf: ldfld int32 Terraria.Item::stack
+			IL_04d4: ldloc.s 6
+			IL_04d6: add
+			IL_04d7: stfld int32 Terraria.Item::stack
+			// Main.PlaySound(7);
+			IL_04dc: ldc.i4.7
+			IL_04dd: ldc.i4.m1
+			IL_04de: ldc.i4.m1
+			IL_04df: ldc.i4.1
+			IL_04e0: ldc.r4 1
+			IL_04e5: ldc.r4 0.0
+			IL_04ea: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_04ef: pop
+			// if (player.inventory[num].stack <= 0)
+			IL_04f0: ldloc.0
+			IL_04f1: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_04f6: ldloc.1
+			IL_04f7: ldelem.ref
+			IL_04f8: ldfld int32 Terraria.Item::stack
+			IL_04fd: ldc.i4.0
+			IL_04fe: bgt.s IL_0514
+
+			// player.inventory[num].SetDefaults();
+			IL_0500: ldloc.0
+			IL_0501: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0506: ldloc.1
+			IL_0507: ldelem.ref
+			IL_0508: ldc.i4.0
+			IL_0509: ldc.i4.0
+			IL_050a: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+			// break;
+			IL_050f: br IL_06ba
+
+			// if (player.bank3.item[i].type == 0)
+			IL_0514: ldloc.0
+			IL_0515: ldfld class Terraria.Chest Terraria.Player::bank3
+			IL_051a: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_051f: ldloc.2
+			IL_0520: ldelem.ref
+			IL_0521: ldfld int32 Terraria.Item::'type'
+			IL_0526: brtrue IL_06ae
+
+			// player.bank3.item[i] = player.inventory[num].Clone();
+			IL_052b: ldloc.0
+			IL_052c: ldfld class Terraria.Chest Terraria.Player::bank3
+			IL_0531: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0536: ldloc.2
+			IL_0537: ldloc.0
+			IL_0538: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_053d: ldloc.1
+			IL_053e: ldelem.ref
+			IL_053f: callvirt instance class Terraria.Item Terraria.Item::Clone()
+			IL_0544: stelem.ref
+			// player.inventory[num].SetDefaults();
+			IL_0545: ldloc.0
+			IL_0546: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_054b: ldloc.1
+			IL_054c: ldelem.ref
+			IL_054d: ldc.i4.0
+			IL_054e: ldc.i4.0
+			IL_054f: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+			// else if (player.bank.item[i].stack < player.bank.item[i].maxStack && player.inventory[num].IsTheSameAs(player.bank.item[i]))
+			IL_0554: br IL_06ae
+
+			IL_0559: ldloc.0
+			IL_055a: ldfld class Terraria.Chest Terraria.Player::bank
+			IL_055f: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0564: ldloc.2
+			IL_0565: ldelem.ref
+			IL_0566: ldfld int32 Terraria.Item::stack
+			IL_056b: ldloc.0
+			IL_056c: ldfld class Terraria.Chest Terraria.Player::bank
+			IL_0571: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0576: ldloc.2
+			IL_0577: ldelem.ref
+			IL_0578: ldfld int32 Terraria.Item::maxStack
+			IL_057d: bge IL_06ae
+
+			IL_0582: ldloc.0
+			IL_0583: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0588: ldloc.1
+			IL_0589: ldelem.ref
+			IL_058a: ldloc.0
+			IL_058b: ldfld class Terraria.Chest Terraria.Player::bank
+			IL_0590: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0595: ldloc.2
+			IL_0596: ldelem.ref
+			IL_0597: callvirt instance bool Terraria.Item::IsTheSameAs(class Terraria.Item)
+			IL_059c: brfalse IL_06ae
+
+			// int num5 = player.inventory[num].stack;
+			IL_05a1: ldloc.0
+			IL_05a2: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_05a7: ldloc.1
+			IL_05a8: ldelem.ref
+			IL_05a9: ldfld int32 Terraria.Item::stack
+			IL_05ae: stloc.s 7
+			// if (player.inventory[num].stack + player.bank.item[i].stack > player.bank.item[i].maxStack)
+			IL_05b0: ldloc.0
+			IL_05b1: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_05b6: ldloc.1
+			IL_05b7: ldelem.ref
+			IL_05b8: ldfld int32 Terraria.Item::stack
+			IL_05bd: ldloc.0
+			IL_05be: ldfld class Terraria.Chest Terraria.Player::bank
+			IL_05c3: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_05c8: ldloc.2
+			IL_05c9: ldelem.ref
+			IL_05ca: ldfld int32 Terraria.Item::stack
+			IL_05cf: add
+			IL_05d0: ldloc.0
+			IL_05d1: ldfld class Terraria.Chest Terraria.Player::bank
+			IL_05d6: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_05db: ldloc.2
+			IL_05dc: ldelem.ref
+			IL_05dd: ldfld int32 Terraria.Item::maxStack
+			IL_05e2: ble.s IL_060b
+
+			// num5 = player.bank.item[i].maxStack - player.bank.item[i].stack;
+			IL_05e4: ldloc.0
+			IL_05e5: ldfld class Terraria.Chest Terraria.Player::bank
+			IL_05ea: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_05ef: ldloc.2
+			IL_05f0: ldelem.ref
+			IL_05f1: ldfld int32 Terraria.Item::maxStack
+			IL_05f6: ldloc.0
+			IL_05f7: ldfld class Terraria.Chest Terraria.Player::bank
+			IL_05fc: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0601: ldloc.2
+			IL_0602: ldelem.ref
+			IL_0603: ldfld int32 Terraria.Item::stack
+			IL_0608: sub
+			IL_0609: stloc.s 7
+
+			// player.inventory[num].stack -= num5;
+			IL_060b: ldloc.0
+			IL_060c: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0611: ldloc.1
+			IL_0612: ldelem.ref
+			IL_0613: dup
+			IL_0614: ldfld int32 Terraria.Item::stack
+			IL_0619: ldloc.s 7
+			IL_061b: sub
+			IL_061c: stfld int32 Terraria.Item::stack
+			// player.bank.item[i].stack += num5;
+			IL_0621: ldloc.0
+			IL_0622: ldfld class Terraria.Chest Terraria.Player::bank
+			IL_0627: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_062c: ldloc.2
+			IL_062d: ldelem.ref
+			IL_062e: dup
+			IL_062f: ldfld int32 Terraria.Item::stack
+			IL_0634: ldloc.s 7
+			IL_0636: add
+			IL_0637: stfld int32 Terraria.Item::stack
+			// Main.PlaySound(7);
+			IL_063c: ldc.i4.7
+			IL_063d: ldc.i4.m1
+			IL_063e: ldc.i4.m1
+			IL_063f: ldc.i4.1
+			IL_0640: ldc.r4 1
+			IL_0645: ldc.r4 0.0
+			IL_064a: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_064f: pop
+			// if (player.inventory[num].stack <= 0)
+			IL_0650: ldloc.0
+			IL_0651: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0656: ldloc.1
+			IL_0657: ldelem.ref
+			IL_0658: ldfld int32 Terraria.Item::stack
+			IL_065d: ldc.i4.0
+			IL_065e: bgt.s IL_0671
+
+			// player.inventory[num].SetDefaults();
+			IL_0660: ldloc.0
+			IL_0661: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0666: ldloc.1
+			IL_0667: ldelem.ref
+			IL_0668: ldc.i4.0
+			IL_0669: ldc.i4.0
+			IL_066a: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+			// break;
+			IL_066f: br.s IL_06ba
+
+			// if (player.bank.item[i].type == 0)
+			IL_0671: ldloc.0
+			IL_0672: ldfld class Terraria.Chest Terraria.Player::bank
+			IL_0677: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_067c: ldloc.2
+			IL_067d: ldelem.ref
+			IL_067e: ldfld int32 Terraria.Item::'type'
+			IL_0683: brtrue.s IL_06ae
+
+			// player.bank.item[i] = player.inventory[num].Clone();
+			IL_0685: ldloc.0
+			IL_0686: ldfld class Terraria.Chest Terraria.Player::bank
+			IL_068b: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0690: ldloc.2
+			IL_0691: ldloc.0
+			IL_0692: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0697: ldloc.1
+			IL_0698: ldelem.ref
+			IL_0699: callvirt instance class Terraria.Item Terraria.Item::Clone()
+			IL_069e: stelem.ref
+			// player.inventory[num].SetDefaults();
+			IL_069f: ldloc.0
+			IL_06a0: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_06a5: ldloc.1
+			IL_06a6: ldelem.ref
+			IL_06a7: ldc.i4.0
+			IL_06a8: ldc.i4.0
+			IL_06a9: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+
+			// for (int i = 0; i < 40; i++)
+			IL_06ae: ldloc.2
+			IL_06af: ldc.i4.1
+			IL_06b0: add
+			IL_06b1: stloc.2
+
+			// for (int i = 0; i < 40; i++)
+			IL_06b2: ldloc.2
+			IL_06b3: ldc.i4.s 40
+			IL_06b5: blt IL_00e7
+		// end loop
+
+		// if (player.inventory[num].stack > 0)
+		IL_06ba: ldloc.0
+		IL_06bb: ldfld class Terraria.Item[] Terraria.Player::inventory
+		IL_06c0: ldloc.1
+		IL_06c1: ldelem.ref
+		IL_06c2: ldfld int32 Terraria.Item::stack
+		IL_06c7: ldc.i4.0
+		IL_06c8: ble IL_08d4
+
+		// if (player.chest > -1)
+		IL_06cd: ldloc.0
+		IL_06ce: ldfld int32 Terraria.Player::chest
+		IL_06d3: ldc.i4.m1
+		IL_06d4: ble IL_0784
+
+		// for (int j = 0; j < 40; j++)
+		IL_06d9: ldc.i4.0
+		IL_06da: stloc.s 8
+		// if (Main.chest[player.chest].item[j].stack == 0)
+		IL_06dc: br IL_0776
+		// loop start (head: IL_0776)
+			IL_06e1: ldsfld class Terraria.Chest[] Terraria.Main::chest
+			IL_06e6: ldloc.0
+			IL_06e7: ldfld int32 Terraria.Player::chest
+			IL_06ec: ldelem.ref
+			IL_06ed: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_06f2: ldloc.s 8
+			IL_06f4: ldelem.ref
+			IL_06f5: ldfld int32 Terraria.Item::stack
+			IL_06fa: brtrue.s IL_0770
+
+			// Main.PlaySound(7);
+			IL_06fc: ldc.i4.7
+			IL_06fd: ldc.i4.m1
+			IL_06fe: ldc.i4.m1
+			IL_06ff: ldc.i4.1
+			IL_0700: ldc.r4 1
+			IL_0705: ldc.r4 0.0
+			IL_070a: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_070f: pop
+			// Main.chest[player.chest].item[j] = player.inventory[num].Clone();
+			IL_0710: ldsfld class Terraria.Chest[] Terraria.Main::chest
+			IL_0715: ldloc.0
+			IL_0716: ldfld int32 Terraria.Player::chest
+			IL_071b: ldelem.ref
+			IL_071c: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0721: ldloc.s 8
+			IL_0723: ldloc.0
+			IL_0724: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0729: ldloc.1
+			IL_072a: ldelem.ref
+			IL_072b: callvirt instance class Terraria.Item Terraria.Item::Clone()
+			IL_0730: stelem.ref
+			// player.inventory[num].SetDefaults();
+			IL_0731: ldloc.0
+			IL_0732: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0737: ldloc.1
+			IL_0738: ldelem.ref
+			IL_0739: ldc.i4.0
+			IL_073a: ldc.i4.0
+			IL_073b: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+			// if (Main.netMode == 1)
+			IL_0740: ldsfld int32 Terraria.Main::netMode
+			IL_0745: ldc.i4.1
+			IL_0746: bne.un IL_08d4
+
+			// NetMessage.SendData(32, -1, -1, null, player.chest, j);
+			IL_074b: ldc.i4.s 32
+			IL_074d: ldc.i4.m1
+			IL_074e: ldc.i4.m1
+			IL_074f: ldnull
+			IL_0750: ldloc.0
+			IL_0751: ldfld int32 Terraria.Player::chest
+			IL_0756: ldloc.s 8
+			IL_0758: conv.r4
+			IL_0759: ldc.r4 0.0
+			IL_075e: ldc.r4 0.0
+			IL_0763: ldc.i4.0
+			IL_0764: ldc.i4.0
+			IL_0765: ldc.i4.0
+			IL_0766: call void Terraria.NetMessage::SendData(int32, int32, int32, class Terraria.Localization.NetworkText, int32, float32, float32, float32, int32, int32, int32)
+			// break;
+			IL_076b: br IL_08d4
+
+			// for (int j = 0; j < 40; j++)
+			IL_0770: ldloc.s 8
+			IL_0772: ldc.i4.1
+			IL_0773: add
+			IL_0774: stloc.s 8
+
+			// for (int j = 0; j < 40; j++)
+			IL_0776: ldloc.s 8
+			IL_0778: ldc.i4.s 40
+			IL_077a: blt IL_06e1
+		// end loop
+
+		// else if (player.chest == -3)
+		IL_077f: br IL_08d4
+
+		IL_0784: ldloc.0
+		IL_0785: ldfld int32 Terraria.Player::chest
+		IL_078a: ldc.i4.s -3
+		IL_078c: bne.un.s IL_07fc
+
+		// for (int k = 0; k < 40; k++)
+		IL_078e: ldc.i4.0
+		IL_078f: stloc.s 9
+		// if (player.bank2.item[k].stack == 0)
+		IL_0791: br.s IL_07f1
+		// loop start (head: IL_07f1)
+			IL_0793: ldloc.0
+			IL_0794: ldfld class Terraria.Chest Terraria.Player::bank2
+			IL_0799: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_079e: ldloc.s 9
+			IL_07a0: ldelem.ref
+			IL_07a1: ldfld int32 Terraria.Item::stack
+			IL_07a6: brtrue.s IL_07eb
+
+			// Main.PlaySound(7);
+			IL_07a8: ldc.i4.7
+			IL_07a9: ldc.i4.m1
+			IL_07aa: ldc.i4.m1
+			IL_07ab: ldc.i4.1
+			IL_07ac: ldc.r4 1
+			IL_07b1: ldc.r4 0.0
+			IL_07b6: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_07bb: pop
+			// player.bank2.item[k] = player.inventory[num].Clone();
+			IL_07bc: ldloc.0
+			IL_07bd: ldfld class Terraria.Chest Terraria.Player::bank2
+			IL_07c2: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_07c7: ldloc.s 9
+			IL_07c9: ldloc.0
+			IL_07ca: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_07cf: ldloc.1
+			IL_07d0: ldelem.ref
+			IL_07d1: callvirt instance class Terraria.Item Terraria.Item::Clone()
+			IL_07d6: stelem.ref
+			// player.inventory[num].SetDefaults();
+			IL_07d7: ldloc.0
+			IL_07d8: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_07dd: ldloc.1
+			IL_07de: ldelem.ref
+			IL_07df: ldc.i4.0
+			IL_07e0: ldc.i4.0
+			IL_07e1: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+			// break;
+			IL_07e6: br IL_08d4
+
+			// for (int k = 0; k < 40; k++)
+			IL_07eb: ldloc.s 9
+			IL_07ed: ldc.i4.1
+			IL_07ee: add
+			IL_07ef: stloc.s 9
+
+			// for (int k = 0; k < 40; k++)
+			IL_07f1: ldloc.s 9
+			IL_07f3: ldc.i4.s 40
+			IL_07f5: blt.s IL_0793
+		// end loop
+
+		// else if (player.chest == -4)
+		IL_07f7: br IL_08d4
+
+		IL_07fc: ldloc.0
+		IL_07fd: ldfld int32 Terraria.Player::chest
+		IL_0802: ldc.i4.s -4
+		IL_0804: bne.un.s IL_086e
+
+		// for (int l = 0; l < 40; l++)
+		IL_0806: ldc.i4.0
+		IL_0807: stloc.s 10
+		// if (player.bank3.item[l].stack == 0)
+		IL_0809: br.s IL_0866
+		// loop start (head: IL_0866)
+			IL_080b: ldloc.0
+			IL_080c: ldfld class Terraria.Chest Terraria.Player::bank3
+			IL_0811: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_0816: ldloc.s 10
+			IL_0818: ldelem.ref
+			IL_0819: ldfld int32 Terraria.Item::stack
+			IL_081e: brtrue.s IL_0860
+
+			// Main.PlaySound(7);
+			IL_0820: ldc.i4.7
+			IL_0821: ldc.i4.m1
+			IL_0822: ldc.i4.m1
+			IL_0823: ldc.i4.1
+			IL_0824: ldc.r4 1
+			IL_0829: ldc.r4 0.0
+			IL_082e: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_0833: pop
+			// player.bank3.item[l] = player.inventory[num].Clone();
+			IL_0834: ldloc.0
+			IL_0835: ldfld class Terraria.Chest Terraria.Player::bank3
+			IL_083a: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_083f: ldloc.s 10
+			IL_0841: ldloc.0
+			IL_0842: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0847: ldloc.1
+			IL_0848: ldelem.ref
+			IL_0849: callvirt instance class Terraria.Item Terraria.Item::Clone()
+			IL_084e: stelem.ref
+			// player.inventory[num].SetDefaults();
+			IL_084f: ldloc.0
+			IL_0850: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_0855: ldloc.1
+			IL_0856: ldelem.ref
+			IL_0857: ldc.i4.0
+			IL_0858: ldc.i4.0
+			IL_0859: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+			// break;
+			IL_085e: br.s IL_08d4
+
+			// for (int l = 0; l < 40; l++)
+			IL_0860: ldloc.s 10
+			IL_0862: ldc.i4.1
+			IL_0863: add
+			IL_0864: stloc.s 10
+
+			// for (int l = 0; l < 40; l++)
+			IL_0866: ldloc.s 10
+			IL_0868: ldc.i4.s 40
+			IL_086a: blt.s IL_080b
+		// end loop
+
+		// for (int m = 0; m < 40; m++)
+		IL_086c: br.s IL_08d4
+
+		IL_086e: ldc.i4.0
+		IL_086f: stloc.s 11
+		// if (player.bank.item[m].stack == 0)
+		IL_0871: br.s IL_08ce
+		// loop start (head: IL_08ce)
+			IL_0873: ldloc.0
+			IL_0874: ldfld class Terraria.Chest Terraria.Player::bank
+			IL_0879: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_087e: ldloc.s 11
+			IL_0880: ldelem.ref
+			IL_0881: ldfld int32 Terraria.Item::stack
+			IL_0886: brtrue.s IL_08c8
+
+			// Main.PlaySound(7);
+			IL_0888: ldc.i4.7
+			IL_0889: ldc.i4.m1
+			IL_088a: ldc.i4.m1
+			IL_088b: ldc.i4.1
+			IL_088c: ldc.r4 1
+			IL_0891: ldc.r4 0.0
+			IL_0896: call class [Microsoft.Xna.Framework]Microsoft.Xna.Framework.Audio.SoundEffectInstance Terraria.Main::PlaySound(int32, int32, int32, int32, float32, float32)
+			IL_089b: pop
+			// player.bank.item[m] = player.inventory[num].Clone();
+			IL_089c: ldloc.0
+			IL_089d: ldfld class Terraria.Chest Terraria.Player::bank
+			IL_08a2: ldfld class Terraria.Item[] Terraria.Chest::item
+			IL_08a7: ldloc.s 11
+			IL_08a9: ldloc.0
+			IL_08aa: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_08af: ldloc.1
+			IL_08b0: ldelem.ref
+			IL_08b1: callvirt instance class Terraria.Item Terraria.Item::Clone()
+			IL_08b6: stelem.ref
+			// player.inventory[num].SetDefaults();
+			IL_08b7: ldloc.0
+			IL_08b8: ldfld class Terraria.Item[] Terraria.Player::inventory
+			IL_08bd: ldloc.1
+			IL_08be: ldelem.ref
+			IL_08bf: ldc.i4.0
+			IL_08c0: ldc.i4.0
+			IL_08c1: callvirt instance void Terraria.Item::SetDefaults(int32, bool)
+			// break;
+			IL_08c6: br.s IL_08d4
+
+			// for (int m = 0; m < 40; m++)
+			IL_08c8: ldloc.s 11
+			IL_08ca: ldc.i4.1
+			IL_08cb: add
+			IL_08cc: stloc.s 11
+
+			// for (int m = 0; m < 40; m++)
+			IL_08ce: ldloc.s 11
+			IL_08d0: ldc.i4.s 40
+			IL_08d2: blt.s IL_0873
+		// end loop
+
+		// for (int num = 49; num >= 10; num--)
+		IL_08d4: ldloc.1
+		IL_08d5: ldc.i4.1
+		IL_08d6: sub
+		IL_08d7: stloc.1
+
+		// for (int num = 49; num >= 10; num--)
+		IL_08d8: ldloc.1
+		IL_08d9: ldc.i4.s 10
+		IL_08db: bge IL_0095
+	// end loop
+
+	// }
+	IL_08e0: ret
+} // end of method ChestUI::DepositAll
+
+
+
